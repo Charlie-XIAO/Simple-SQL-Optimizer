@@ -15,7 +15,7 @@ public class Launcher {
         String sqlText =
             "SELECT SUM(A.ID), B.NAME "
                 + "FROM A LEFT JOIN B ON A.ID = B.ID "
-                + "INNER JOIN C ON A.ID = C.ID "
+                + "INNER JOIN C ON B.ID = C.ID "
                 + "INNER JOIN D ON A.ID = D.ID "
                 + "INNER JOIN E ON A.ID = E.ID "
                 + "INNER JOIN F ON A.ID = F.ID "
@@ -33,7 +33,7 @@ public class Launcher {
         originalLogicalPlan.printPlan();
         JoinReorder joinReorderRewriter = new JoinReorder(originalLogicalPlan);
         System.out.println(" -------- -------- -------- -------- --------");
-        System.out.println("Test message: " + null);
+        System.out.println("Test message: " + joinReorderRewriter.getJoinPredicates());
         
     }
 

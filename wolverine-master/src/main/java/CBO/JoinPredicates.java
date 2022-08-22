@@ -1,15 +1,16 @@
 package CBO;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
 
 import plan.JoinNode;
 
 public class JoinPredicates {
  
-    private Set<List<String>> predicates;
+    private Set<Map<String, String>> predicates;
 
     public JoinPredicates() {
         this.predicates = new HashSet<>();
@@ -33,35 +34,27 @@ public class JoinPredicates {
         }
     }
 
-    public Set<List<String>> getPredicates() {
+    public Set<Map<String, String>> getPredicates() {
         return predicates;
     }
 
     public void addPredicate(JoinNode joinNode) {
-        String leftInfo = joinNode.getTableNameLeft() + "." + joinNode.getColumnNameLeft();
-        String rightInfo = joinNode.getTableNameRight() + "." + joinNode.getTableNameRight();
-        if (predicates.size() == 0) {
-            List<String> predicateChain = new LinkedList<>();
-            predicateChain.add(leftInfo);
-            predicateChain.add(rightInfo);
-            predicates.add(predicateChain);
-        }
-        else {
-            for (List<String> predicateChain: predicates) {
-                if (predicateChain.contains(leftInfo)) {
-                    predicateChain.add(rightInfo);
-                    return;
-                }
-                else if (predicateChain.contains(rightInfo)) {
-                    predicateChain.add(leftInfo);
-                    return;
-                }
+        for (Map<String, String> predicateChain: predicates) {
+            String leftColumnNameInfo = predicateChain.get(joinNode.getTableNameLeft());
+            String rightColumnNameInfo = predicateChain.get(joinNode.getTableNameRight());
+            if (leftColumnNameInfo != null && leftColumnNameInfo.equals(joinNode.getColumnNameLeft())) {
+                predicateChain.put(joinNode.getTableNameRight(), joinNode.getColumnNameRight());
+                return;
             }
-            List<String> predicateChain = new LinkedList<>();
-            predicateChain.add(leftInfo);
-            predicateChain.add(rightInfo);
-            predicates.add(predicateChain);
+            else if (rightColumnNameInfo != null && rightColumnNameInfo.equals(joinNode.getColumnNameRight())) {
+                predicateChain.put(joinNode.getTableNameLeft(), joinNode.getColumnNameLeft());
+                return;
+            }
         }
+        Map<String, String> predicateChain = new HashMap<>();
+        predicateChain.put(joinNode.getTableNameLeft(), joinNode.getColumnNameLeft());
+        predicateChain.put(joinNode.getTableNameRight(), joinNode.getColumnNameRight());
+        predicates.add(predicateChain);
     }
 
 }

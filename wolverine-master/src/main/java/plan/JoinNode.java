@@ -137,7 +137,7 @@ public class JoinNode extends Node {
 
     public String toString() {
         return "Join(" + joinType + " " + tableNameLeft + "." + columnNameLeft + " " + tableNameRight + "."
-            + columnNameRight + ")  <-- " + physicalJoinType.toString().toLowerCase();
+            + columnNameRight + ")";
     }
 
     public void setPhysicalJoinType(PhysicalJoinType physicalJoinType) {

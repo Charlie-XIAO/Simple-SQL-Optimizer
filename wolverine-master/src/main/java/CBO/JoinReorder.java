@@ -3,6 +3,7 @@ package CBO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,19 +21,23 @@ public class JoinReorder {
     private OutputNode originalLogicalPlan;
     private boolean hasJoin;
     private List<List<JoinNode>> partitionedJoinNodes;
+    private JoinPredicates joinPredicates;
 
     public JoinReorder(OutputNode originalLogicalPlan) {
         this.originalLogicalPlan = originalLogicalPlan;
         this.partitionJoinNodes();
-        //getBestJoinPlan(getPartitionRelations(partitionedJoinNodes.get(1)));
+        JoinNode temp = getBestJoinPlan(getPartitionRelations(partitionedJoinNodes.get(1)), JoinType.INNER, joinPredicates);
+        temp.printPlan();
     }
 
     private void partitionJoinNodes() {
         Node curNode = originalLogicalPlan;
+        LinkedList<JoinNode> allJoinNodes = new LinkedList<>();
         List<List<JoinNode>> partitionedJoinNodes = new ArrayList<>();
         while (!curNode.isLeaf()) {
             if (curNode instanceof JoinNode) {
                 JoinNode joinNode = (JoinNode) curNode;
+                allJoinNodes.addFirst(joinNode);
                 if (partitionedJoinNodes.size() == 0) {
                     List<JoinNode> partition = new ArrayList<>();
                     partition.add(joinNode);
@@ -51,6 +56,7 @@ public class JoinReorder {
             curNode = curNode.getChild();
         }
         this.partitionedJoinNodes = partitionedJoinNodes;
+        this.joinPredicates = new JoinPredicates(allJoinNodes);
         if (partitionedJoinNodes.size() == 0) {
             this.hasJoin = false;
         } else {
@@ -64,6 +70,10 @@ public class JoinReorder {
 
     public List<List<JoinNode>> getPartitionedJoinNodes() {
         return partitionedJoinNodes;
+    }
+
+    public Set<Map<String, String>> getJoinPredicates() {
+        return joinPredicates.getPredicates();
     }
 
     private static Map<Integer, List<Set<Node>>> generateSubsets(List<Node> nodes) {
@@ -126,18 +136,34 @@ public class JoinReorder {
                 for (Set<Node> leftSubplanCombination: subsets.get(leftSubplanSize)) {
                     for (Set<Node> rightSubplanCombination: subsets.get(planSize - leftSubplanSize)) {
                         if (Collections.disjoint(leftSubplanCombination, rightSubplanCombination)) {
+                            Set<Node> planCombination = new HashSet<>(leftSubplanCombination);
+                            planCombination.addAll(rightSubplanCombination);
                             Node leftSubplan = planMap.get(leftSubplanCombination);
                             Node rightSubplan = planMap.get(rightSubplanCombination);
                             Set<String> leftContainedTables = getContained(leftSubplan);
                             Set<String> rightContainedTables = getContained(rightSubplan);
-                            
+                            String[] predicateArray = determineJoinPredicate(leftContainedTables, rightContainedTables, joinPredicates);
+                            // create the join tree for left subplan and right subplan as the current plan
+                            JoinNode curPlan = new JoinNode();
+                            curPlan.setJoinType(joinType);
+                            curPlan.setTableNameLeft(predicateArray[0]);
+                            curPlan.setColumnNameLeft(predicateArray[1]);
+                            curPlan.setTableNameRight(predicateArray[2]);
+                            curPlan.setColumnNameRight(predicateArray[3]);
+                            curPlan.setLeft(leftSubplan);
+                            curPlan.setRight(rightSubplan);
+                            //System.out.println(planCombination);
+                            //System.out.println(leftContainedTables + " " + rightContainedTables);
+                            //curPlan.printPlan();
+                            //System.out.println();
+                            planMap.put(planCombination, curPlan);
                         }
                     }
                 }
             }
         }
-        return null;
-        //return (JoinNode) planMap.get(new HashSet<>(relations));
+        //return null;
+        return (JoinNode) planMap.get(new HashSet<>(relations));
 
     }
 
@@ -153,6 +179,31 @@ public class JoinReorder {
             contained.addAll(((JoinNode) subplan).getContained());
         }
         return contained;
+    }
+
+    private static String[] determineJoinPredicate(Set<String> leftTables, Set<String> rightTables, JoinPredicates joinPredicates) {
+        for (String leftTable: leftTables) {
+            for (Map<String, String> predicateChain: findPredicateChain(leftTable, joinPredicates)) {
+                for (String rightTable: rightTables) {
+                    if (predicateChain.containsKey(rightTable)) {
+                        String[] results = {leftTable, predicateChain.get(leftTable), rightTable, predicateChain.get(rightTable)};
+                        return results;
+                    }
+                }
+            }
+        }
+        String[] results = {null, null, null, null};
+        return results;
+    }
+
+    private static Set<Map<String, String>> findPredicateChain(String tableName, JoinPredicates joinPredicates) {
+        Set<Map<String, String>> results = new HashSet<>();
+        for (Map<String, String> predicateChain: joinPredicates.getPredicates()) {
+            if (predicateChain.containsKey(tableName)) {
+                results.add(predicateChain);
+            }
+        }
+        return results;
     }
 
 }
