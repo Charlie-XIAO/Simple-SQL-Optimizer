@@ -23,8 +23,11 @@ public class Table {
         this.schema = schema;
     }
 
-    public void addField(String name,String type) {
+    // add field, meanwhile returning the size of that field
+    public int addField(String name, String type) {
+        Column column = new Column(name, type);
         this.schema.add(new Column(name, type));
+        return column.getColSize();
     }
 }
 

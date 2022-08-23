@@ -1,10 +1,10 @@
 package table.Data;
 
-public class StringData extends Data {
+public class TextData extends Data {
     
     private String value;
 
-    public StringData(String value) {
+    public TextData(String value) {
         this.value = value;
     }
 

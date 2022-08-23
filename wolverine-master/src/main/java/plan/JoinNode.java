@@ -258,7 +258,7 @@ public class JoinNode extends Node {
             insideSource = (isLeftOutside) ? rightIterator : leftIterator;
 
             List<Record> buffer = new java.util.ArrayList<Record>();
-            for (int i = 0; i < bufferSize; i++) {
+            for (int i = 0; i < bufferSize; i ++) {
                 if (outsideSource.hasNext()) {
                     buffer.add(outsideSource.next());
                 } else {
@@ -284,7 +284,7 @@ public class JoinNode extends Node {
                     outsideBuffer.reset();
                 } else if (outsideSource.hasNext()) {
                     List<Record> buffer = new java.util.ArrayList<Record>();
-                    for (int i = 0; i < bufferSize; i++) {
+                    for (int i = 0; i < bufferSize; i ++) {
                         if (outsideSource.hasNext()) {
                             buffer.add(outsideSource.next());
                         } else {

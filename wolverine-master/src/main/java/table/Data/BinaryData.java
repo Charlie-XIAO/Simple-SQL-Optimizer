@@ -1,10 +1,11 @@
 package table.Data;
 
-public class StringData extends Data {
+// TODO: Binary data is not this simple, need further modifications.
+public class BinaryData extends Data {
     
     private String value;
 
-    public StringData(String value) {
+    public BinaryData(String value) {
         this.value = value;
     }
 

@@ -1,10 +1,10 @@
 package table.Data;
 
-public class StringData extends Data {
-    
+public class VarcharData extends Data {
+
     private String value;
 
-    public StringData(String value) {
+    public VarcharData(String value) {
         this.value = value;
     }
 
@@ -19,5 +19,5 @@ public class StringData extends Data {
     public String toString() {
         return String.format("%s", value);
     }
-
+    
 }

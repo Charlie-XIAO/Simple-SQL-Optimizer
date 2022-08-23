@@ -78,7 +78,7 @@ public class JoinReorder {
 
     private static Map<Integer, List<Set<Node>>> generateSubsets(List<Node> nodes) {
         Map<Integer, List<Set<Node>>> results = new HashMap<>();
-        for (int i = 0; i < nodes.size(); i++) {
+        for (int i = 0; i < nodes.size(); i ++) {
             results.put(i, new ArrayList<>());
         }
         generateSubsets(nodes, 0, new HashSet<Node>(), results);
@@ -108,7 +108,7 @@ public class JoinReorder {
 
     private static List<Node> getPartitionRelations(List<JoinNode> partition) {
         List<Node> relations = new ArrayList<>();
-        for (int i = 0; i < partition.size(); i++) {
+        for (int i = 0; i < partition.size(); i ++) {
             relations.add(partition.get(i).getRight());
             if (i == partition.size() - 1) {
                 relations.add(partition.get(i).getLeft());
@@ -121,18 +121,14 @@ public class JoinReorder {
         return partition.get(0).getJoinType();
     }
 
-    private static JoinPredicates getPartitionJoinPredicates(List<JoinNode> partition) {
-        return new JoinPredicates(partition);
-    }
-
     private static JoinNode getBestJoinPlan(List<Node> relations, JoinType joinType, JoinPredicates joinPredicates) {
         Map<Integer, List<Set<Node>>> subsets = generateSubsets(relations);
         Map<Set<Node>, Node> planMap = new HashMap<>();
         for (Set<Node> combination: subsets.get(1)) {
             planMap.put(combination, combination.iterator().next());
         }
-        for (int planSize = 2; planSize <= relations.size(); planSize++) {
-            for (int leftSubplanSize = 1; leftSubplanSize < planSize; leftSubplanSize++) {
+        for (int planSize = 2; planSize <= relations.size(); planSize ++) {
+            for (int leftSubplanSize = 1; leftSubplanSize < planSize; leftSubplanSize ++) {
                 for (Set<Node> leftSubplanCombination: subsets.get(leftSubplanSize)) {
                     for (Set<Node> rightSubplanCombination: subsets.get(planSize - leftSubplanSize)) {
                         if (Collections.disjoint(leftSubplanCombination, rightSubplanCombination)) {
@@ -152,17 +148,12 @@ public class JoinReorder {
                             curPlan.setColumnNameRight(predicateArray[3]);
                             curPlan.setLeft(leftSubplan);
                             curPlan.setRight(rightSubplan);
-                            //System.out.println(planCombination);
-                            //System.out.println(leftContainedTables + " " + rightContainedTables);
-                            //curPlan.printPlan();
-                            //System.out.println();
                             planMap.put(planCombination, curPlan);
                         }
                     }
                 }
             }
         }
-        //return null;
         return (JoinNode) planMap.get(new HashSet<>(relations));
 
     }

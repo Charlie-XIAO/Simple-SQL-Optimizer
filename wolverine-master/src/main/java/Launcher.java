@@ -8,10 +8,54 @@ import parser.SqlBaseParser;
 import plan.LogicalPlanner;
 import plan.Node;
 import plan.OutputNode;
+import plan.ScanNode;
+import table.Record;
+
+import java.util.Map;
+import java.util.Iterator;
+import java.util.List;
 
 public class Launcher {
 
-    private static void plannerTest() throws Exception {
+    private static void ParserTest() throws Exception {
+        String sqlText =
+            "SELECT students.name, courses.name "
+                + "FROM students INNER JOIN courses ON students.sid = courses.sid "
+                + "WHERE students.sid = 1 "
+                + "GROUP BY students.name "
+                + "HAVING SUM(courses.credit) > 3 "
+                + "ORDER BY students.name LIMIT 1";
+        LogicalPlanner builder = new LogicalPlanner();
+        SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText.toUpperCase()));
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        SqlBaseParser parser = new SqlBaseParser(tokenStream);
+        OutputNode originalLogicalPlan = (OutputNode) builder.visit(parser.singleStatement());
+        Map<Integer, List<Node>> logicalPlan = originalLogicalPlan.getLogicalPlan();
+        ScanNode scanNode = (ScanNode) logicalPlan.get(8).get(1);
+        Iterator<Record> iterator = scanNode.iterator();
+    }
+
+    private static void RBOTest() throws Exception {
+        String sqlText =
+            "SELECT students.name, courses.name "
+                + "FROM students INNER JOIN courses ON students.sid = courses.sid "
+                + "WHERE students.sid = 1 "
+                + "GROUP BY students.name "
+                + "HAVING SUM(courses.credit) > 3 "
+                + "ORDER BY students.name "
+                + "LIMIT 1";
+        LogicalPlanner builder = new LogicalPlanner();
+        SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText.toUpperCase()));
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        SqlBaseParser parser = new SqlBaseParser(tokenStream);
+        OutputNode plan = (OutputNode) builder.visit(parser.singleStatement());
+        plan.printPlan();
+        System.out.println();
+        Node optimizedPlan = new RBOptimizer(plan).getOptimizedPlan();
+        optimizedPlan.printPlan();
+    }
+
+    private static void CBOTest() throws Exception {
         String sqlText =
             "SELECT SUM(A.ID), B.NAME "
                 + "FROM A LEFT JOIN B ON A.ID = B.ID "
@@ -34,29 +78,11 @@ public class Launcher {
         JoinReorder joinReorderRewriter = new JoinReorder(originalLogicalPlan);
         System.out.println(" -------- -------- -------- -------- --------");
         System.out.println("Test message: " + joinReorderRewriter.getJoinPredicates());
-        
-    }
-
-    private static void executeTest() throws Exception {
-        String sqlText = "SELECT students.name, courses.name "
-            + "FROM students INNER JOIN courses ON students.sid = courses.sid "
-            + "WHERE students.sid = 1 "
-            + "GROUP BY students.name "
-            + "HAVING SUM(courses.credit) > 3 "
-            + "ORDER BY students.name LIMIT 1 ";
-        LogicalPlanner builder = new LogicalPlanner();
-        SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText.toUpperCase()));
-        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-        SqlBaseParser parser = new SqlBaseParser(tokenStream);
-        OutputNode plan = (OutputNode) builder.visit(parser.singleStatement());
-        plan.printPlan();
-        System.out.println();
-        Node optimizedPlan = new RBOptimizer(plan).getOptimizedPlan();
-        optimizedPlan.printPlan();
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("\n-------- plannerTest --------\n"); plannerTest();
-        //System.out.println("\n-------- executeTest --------\n"); executeTest();
+        System.out.println("\n-------- Parser Test --------\n"); ParserTest();
+        //System.out.println("\n-------- RBO Test --------\n"); RBOTest();
+        //System.out.println("\n-------- CBO Test --------\n"); CBOTest();
     }
 }

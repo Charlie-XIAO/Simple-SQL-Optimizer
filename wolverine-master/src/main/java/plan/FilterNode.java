@@ -2,8 +2,12 @@ package plan;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import utils.BackTracingIterator;
+import table.Record;
 
 public class FilterNode extends Node {
     List<FilterItem> items = new ArrayList<>();
@@ -23,6 +27,17 @@ public class FilterNode extends Node {
     public String toString() {
         return "Filter(" + items + ")";
     }
+
+    @Override
+    public Iterator<Record> iterator() {
+        return backTracingIterator();
+    }
+
+    @Override
+    public BackTracingIterator<Record> backTracingIterator() {
+        return null;
+    }
+
 }
 
 class Comparison {

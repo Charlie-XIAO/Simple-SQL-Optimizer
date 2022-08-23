@@ -1,23 +1,21 @@
 package plan;
 
 import table.Record;
-import table.Table;
 import utils.BackTracingIterator;
 import utils.BacktracingIterable;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Map;
+
+import java.util.List;
 
 public class Node implements BacktracingIterable<Record> {
+    
     protected int height;
     private Node parent;
     private Node child = null;
-
-    public Table table = new Table();
-    public List<Record> records = new ArrayList<>();
 
     public void setChild(Node child) {
         this.child = child;
@@ -36,8 +34,8 @@ public class Node implements BacktracingIterable<Record> {
         return this.parent;
     }
 
-    public HashMap<Integer, HashSet<Node>> getLogicalPlan() {
-        HashMap<Integer, HashSet<Node>> logicalPlan = new HashMap<>();
+    public Map<Integer, List<Node>> getLogicalPlan() {
+        Map<Integer, List<Node>> logicalPlan = new HashMap<>();
         getLogicalPlan(logicalPlan);
         return logicalPlan;
     }
@@ -46,9 +44,9 @@ public class Node implements BacktracingIterable<Record> {
         return this.child == null;
     }
 
-    public void getLogicalPlan(HashMap<Integer, HashSet<Node>> logicalPlan) {
+    public void getLogicalPlan(Map<Integer, List<Node>> logicalPlan) {
         if (!logicalPlan.containsKey(this.height)) {
-            logicalPlan.put(this.height, new HashSet<Node>());
+            logicalPlan.put(this.height, new ArrayList<Node>());
         }
         logicalPlan.get(this.height).add(this);
         if (isJoinNode()) {
@@ -67,10 +65,10 @@ public class Node implements BacktracingIterable<Record> {
 
     @Deprecated
     public void printLogicalPlan() {
-        HashMap<Integer, HashSet<Node>> logicalPlan = getLogicalPlan();
-        for (int height : logicalPlan.keySet()) {
+        Map<Integer, List<Node>> logicalPlan = getLogicalPlan();
+        for (int height: logicalPlan.keySet()) {
             System.out.print(height + ": ");
-            for (Node node : logicalPlan.get(height)) {
+            for (Node node: logicalPlan.get(height)) {
                 System.out.print(node + "   ");
             }
             System.out.println();
@@ -83,7 +81,7 @@ public class Node implements BacktracingIterable<Record> {
 
     private void printPlan(int blankNum) {
         String blank = "";
-        for (int i = 0; i < blankNum; i++) {
+        for (int i = 0; i < blankNum; i ++) {
             blank += "-- ";
         }
         System.out.println(blank + this);

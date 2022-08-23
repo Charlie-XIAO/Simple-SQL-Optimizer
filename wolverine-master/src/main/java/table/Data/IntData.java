@@ -1,6 +1,7 @@
 package table.Data;
 
 public class IntData extends Data {
+
     private int value;
 
     public IntData(String value) {
@@ -18,4 +19,5 @@ public class IntData extends Data {
     public String toString() {
         return String.format("%d", value);
     }
+    
 }
