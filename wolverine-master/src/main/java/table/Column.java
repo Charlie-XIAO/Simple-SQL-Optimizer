@@ -23,10 +23,12 @@ public class Column {
         else {
             if (colType.contains("(")) {
                 try {
-                    this.colType = ColumnType.valueOf(colType.substring(0, colType.indexOf("(")));
+                    System.out.println(colName + " " + colType);
+                    this.colType = ColumnType.valueOf(colType.substring(0, colType.indexOf("(")).toUpperCase(Locale.ENGLISH));
                     this.colSize = Integer.parseInt(colType.substring(colType.indexOf("(") + 1, colType.indexOf(")")));
                 }
                 catch (Exception e) {
+                    System.out.println(e);
                     this.colType = ColumnType.UNKNOWN;
                     this.colSize = 0;
                 }

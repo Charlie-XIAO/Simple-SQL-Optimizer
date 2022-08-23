@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Table {
+
     private String tableName;
     private List<Column> schema = new ArrayList<>();
 
@@ -23,7 +24,7 @@ public class Table {
         this.schema = schema;
     }
 
-    // add field, meanwhile returning the size of that field
+    // add field and meanwhile returning the size of that field
     public int addField(String name, String type) {
         Column column = new Column(name, type);
         this.schema.add(new Column(name, type));

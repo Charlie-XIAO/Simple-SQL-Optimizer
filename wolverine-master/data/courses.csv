@@ -1,4 +1,4 @@
-cid int,name string,department string
+cid int,name VARCHAR(1024),department VARCHAR(1024)
 1,CS 186,Computer Science
 2,CS 61A,Computer Science
 3,BIO 1A,Biology
