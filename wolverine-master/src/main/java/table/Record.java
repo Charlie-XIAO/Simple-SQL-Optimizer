@@ -76,7 +76,7 @@ public class Record {
         for (int i = 0; i < data.size(); i ++) {
             sb.append(data.get(i).toString());
             if (i != data.size() - 1) {
-                sb.append(", ");
+                sb.append(" | ");
             }
         }
         return sb.toString();

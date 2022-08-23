@@ -1,11 +1,14 @@
 package plan;
 
 import table.Record;
+import table.Statistics;
+import table.Table;
 import plan.type.JoinType;
 import plan.type.PhysicalJoinType;
 import utils.BackTracingIterator;
 import utils.ListBacktracingIterator;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -19,12 +22,16 @@ public class JoinNode extends Node {
     private String columnNameLeft;
     private String columnNameRight;
     private PhysicalJoinType physicalJoinType = PhysicalJoinType.BLOCK_NESTED_LOOP_JOIN;
-
     // JoinNode has `left` and `right` instead of `child` in its parent class Node
     private Node left;
     private Node right;
-
+    // for data storage
+    public Table table = new Table();
+    public List<Record> records = new ArrayList<>();
+    // CBO join reorder required information
     private Set<String> _contained;
+    // CBO required statistics
+    private Statistics statistics = new Statistics();
 
     public void setLeft(Node left) {
         this.left = left;

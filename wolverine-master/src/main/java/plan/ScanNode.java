@@ -21,9 +21,9 @@ import java.util.Iterator;
 public class ScanNode extends Node {
 
     String tableName;
+    // for data storage
     public Table table = new Table();
     public List<Record> records = new ArrayList<>();
-
     // CBO required statistics
     Statistics statistics = new Statistics();
 
@@ -33,6 +33,10 @@ public class ScanNode extends Node {
 
     public String getTableName() {
         return tableName;
+    }
+
+    public Statistics getStatistics() {
+        return statistics;
     }
 
     public String toString() {
@@ -45,11 +49,11 @@ public class ScanNode extends Node {
     }
 
     public BackTracingIterator<Record> backTracingIterator() {
-        ReadCSV();
+        readCSV();
         return new ListBacktracingIterator(records);
     }
 
-    private void ReadCSV() {
+    private void readCSV() {
         int rowCount = 0;
         List<Integer> columnSizes = new ArrayList<>();
         List<Double> mins = new ArrayList<>();

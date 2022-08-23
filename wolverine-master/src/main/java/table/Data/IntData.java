@@ -16,6 +16,11 @@ public class IntData extends Data {
         this.value = value;
     }
 
+    @Override
+    public String getEvalExpression() {
+        return Integer.toString(value);
+    }
+
     public String toString() {
         return String.format("%d", value);
     }

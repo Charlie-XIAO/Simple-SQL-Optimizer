@@ -6,6 +6,11 @@ public class NullData extends Data {
         return null;
     }
 
+    @Override
+    public String getEvalExpression() {
+        return "null";
+    }
+
     public String toString() {
         return "null";
     }

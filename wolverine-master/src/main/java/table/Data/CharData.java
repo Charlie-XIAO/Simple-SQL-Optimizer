@@ -16,6 +16,11 @@ public class CharData extends Data {
         this.value = value;
     }
 
+    @Override
+    public String getEvalExpression() {
+        return Character.toString(value);
+    }
+
     public String toString() {
         return String.format("%c", value);
     }

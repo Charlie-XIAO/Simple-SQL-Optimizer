@@ -1,7 +1,7 @@
-import RBO.RBOptimizer;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import RBO.RBOptimizer;
 import CBO.JoinReorder;
 import parser.SqlBaseLexer;
 import parser.SqlBaseParser;
@@ -30,9 +30,13 @@ public class Launcher {
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         SqlBaseParser parser = new SqlBaseParser(tokenStream);
         OutputNode originalLogicalPlan = (OutputNode) builder.visit(parser.singleStatement());
+        originalLogicalPlan.printPlan();
         Map<Integer, List<Node>> logicalPlan = originalLogicalPlan.getLogicalPlan();
         ScanNode scanNode = (ScanNode) logicalPlan.get(8).get(1);
         Iterator<Record> iterator = scanNode.iterator();
+        System.out.println(scanNode.records);
+        System.out.println(scanNode.table.getSchema());
+        System.out.println(scanNode.getStatistics());
     }
 
     private static void RBOTest() throws Exception {
@@ -85,4 +89,5 @@ public class Launcher {
         //System.out.println("\n-------- RBO Test --------\n"); RBOTest();
         //System.out.println("\n-------- CBO Test --------\n"); CBOTest();
     }
+
 }

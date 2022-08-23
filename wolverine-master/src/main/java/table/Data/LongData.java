@@ -16,6 +16,11 @@ public class LongData extends Data {
         this.value = value;
     }
 
+    @Override
+    public String getEvalExpression() {
+        return Long.toString(value);
+    }
+
     public String toString() {
         return String.format("%d", value);
     }

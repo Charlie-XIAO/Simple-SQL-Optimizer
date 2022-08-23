@@ -16,6 +16,14 @@ public class Table {
         return schema;
     }
 
+    public List<String> getColumnNames() {
+        List<String> columnNames = new ArrayList<>();
+        for (Column column: schema) {
+            columnNames.add(column.getColName());
+        }
+        return columnNames;
+    }
+
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }

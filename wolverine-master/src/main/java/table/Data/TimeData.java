@@ -30,6 +30,11 @@ public class TimeData extends Data {
         this.value = value;
     }
 
+    @Override
+    public String getEvalExpression() {
+        return Long.toString(milliseconds);
+    }
+
     public String toString() {
         return String.format("%t", value);
     }

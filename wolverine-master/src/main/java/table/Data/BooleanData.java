@@ -16,6 +16,11 @@ public class BooleanData extends Data {
         this.value = value;
     }
 
+    @Override
+    public String getEvalExpression() {
+        return Boolean.toString(value);
+    }
+
     public String toString() {
         return String.format("%s", value);
     }

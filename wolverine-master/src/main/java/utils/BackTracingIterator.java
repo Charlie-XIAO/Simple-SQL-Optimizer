@@ -3,6 +3,7 @@ package utils;
 import java.util.Iterator;
 
 public interface BackTracingIterator<Record> extends Iterator<Record> {
+
     void markPrev();
 
     void markNext();
@@ -10,4 +11,5 @@ public interface BackTracingIterator<Record> extends Iterator<Record> {
     void reset();
 
     void markStart();
+    
 }

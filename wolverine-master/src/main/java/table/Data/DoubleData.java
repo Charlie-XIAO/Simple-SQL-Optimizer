@@ -16,6 +16,11 @@ public class DoubleData extends Data {
         this.value = value;
     }
 
+    @Override
+    public String getEvalExpression() {
+        return Double.toString(value);
+    }
+
     public String toString() {
         return String.format("%f", value);
     }

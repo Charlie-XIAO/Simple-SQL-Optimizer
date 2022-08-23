@@ -24,6 +24,11 @@ public class BlobData extends Data {
         this.value = value;
     }
 
+    @Override
+    public String getEvalExpression() {
+        return value.toString();
+    }
+
     public String toString() {
         return String.format("%s", value);
     }

@@ -16,6 +16,11 @@ public class FloatData extends Data {
         this.value = value;
     }
 
+    @Override
+    public String getEvalExpression() {
+        return Float.toString(value);
+    }
+
     public String toString() {
         return String.format("%f", value);
     }

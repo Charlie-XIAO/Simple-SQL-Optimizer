@@ -49,4 +49,13 @@ public class Statistics {
         return numNulls;
     }
 
+    public String toString() {
+        return "______ ______ STATISTICS ______ ______\n"
+            + "Row count: " + Integer.toString(rowCount) + "\n"
+            + "Column sizes: " + columnSizes.toString() + "\n"
+            + "Maximums: " + maxs.toString() + "\n"
+            + "Minimums: " + mins.toString() + "\n"
+            + "Null count: " + numNulls.toString();
+    }
+
 }

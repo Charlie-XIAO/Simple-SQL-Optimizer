@@ -16,6 +16,11 @@ public class TextData extends Data {
         this.value = value;
     }
 
+    @Override
+    public String getEvalExpression() {
+        return value;
+    }
+
     public String toString() {
         return String.format("%s", value);
     }
