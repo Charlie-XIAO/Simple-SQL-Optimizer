@@ -3,26 +3,37 @@ package utils;
 import plan.JoinNode;
 import plan.type.JoinType;
 import table.Record;
+import table.Statistics;
 import table.Column;
+import table.Data.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> {
 
+    private JoinNode joinNode;
+    private JoinType joinType;
+
+    private int rowCount = 0;
+    private List<Integer> columnSizes = new ArrayList<>();
+    private List<Double> mins = new ArrayList<>();
+    private List<Double> maxs = new ArrayList<>();
+    private List<Integer> numNulls = new ArrayList<>();
+
     private BackTracingIterator<Record> outsideSource;
     private BackTracingIterator<Record> insideSource;
     private Record outsideRecord;
     private Record nextRecord;
     private List<Column> joinedSchema;
-    
-    private JoinType joinType;
+
     private int outsideIndex, insideIndex;
     private int outsideLength, insideLength;  // outer joins required null record length
     private List<Column> outsideSchema, insideSchema; // outer joins required null record schema
     private boolean terminate = false;  // outer joins required terminate condition
 
     public DummyNestedLoopJoinIterator(JoinNode joinNode, boolean isLeftOutside) {
+        this.joinNode = joinNode;
         this.joinType = joinNode.getJoinType();
         BackTracingIterator<Record> leftIterator = joinNode.getLeft().backTracingIterator();
         BackTracingIterator<Record> rightIterator = joinNode.getRight().backTracingIterator();
@@ -102,6 +113,47 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             nextRecord = computeNextRecord();
         }
         joinNode.setTableSchema(joinedSchema);
+        joinNode.records.add(nextRecord);
+        rowCount ++;
+        for (int i = 0; i < nextRecord.getData().size(); i ++) {
+            Data data = nextRecord.getData().get(i);
+            Double curData;
+            if (data instanceof DoubleData) {
+                curData = ((DoubleData) data).getValue();
+            }
+            else if (data instanceof FloatData) {
+                curData = (double) ((FloatData) data).getValue();
+            }
+            else if (data instanceof IntData) {
+                curData = (double) ((IntData) data).getValue();
+            }
+            else if (data instanceof LongData) {
+                curData = (double) ((LongData) data).getValue();
+            }
+            else if (data instanceof DateData) {
+                curData = (double) ((DateData) data).getMilliseconds();
+            }
+            else if (data instanceof TimeData) {
+                curData = (double) ((TimeData) data).getMilliseconds();
+            }
+            else if (data instanceof TimestampData) {
+                curData = (double) ((TimestampData) data).getMilliseconds();
+            }
+            else if (data instanceof CharData) {
+                curData = (double) ((CharData) data).getValue();
+            }
+            else {
+                curData = null;
+            }
+            mins.add(curData);
+            maxs.add(curData);
+            if (data instanceof NullData) {
+                numNulls.add(1);
+            }
+            else {
+                numNulls.add(0);
+            }
+        }
     }
 
     @Override
@@ -126,6 +178,59 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
         }
         else {
             nextRecord = computeNextRecord();
+        }
+        if (nextRecord != null) {
+            joinNode.records.add(nextRecord);
+            rowCount ++;
+            for (int i = 0; i < nextRecord.getData().size(); i ++) {
+                Data data = nextRecord.getData().get(i);
+                Double curData;
+                if (data instanceof DoubleData) {
+                    curData = ((DoubleData) data).getValue();
+                }
+                else if (data instanceof FloatData) {
+                    curData = (double) ((FloatData) data).getValue();
+                }
+                else if (data instanceof IntData) {
+                    curData = (double) ((IntData) data).getValue();
+                }
+                else if (data instanceof LongData) {
+                    curData = (double) ((LongData) data).getValue();
+                }
+                else if (data instanceof DateData) {
+                    curData = (double) ((DateData) data).getMilliseconds();
+                }
+                else if (data instanceof TimeData) {
+                    curData = (double) ((TimeData) data).getMilliseconds();
+                }
+                else if (data instanceof TimestampData) {
+                    curData = (double) ((TimestampData) data).getMilliseconds();
+                }
+                else if (data instanceof CharData) {
+                    curData = (double) ((CharData) data).getValue();
+                }
+                else {
+                    curData = null;
+                }
+                if (data instanceof NullData) {
+                    numNulls.set(i, numNulls.get(i) + 1);
+                }
+                if (curData == null) {
+                    continue;
+                }
+                if (curData < mins.get(i)) {
+                    mins.set(i, curData);
+                }
+                if (curData > maxs.get(i)) {
+                    maxs.set(i, curData);
+                }
+            }
+        }
+        else {
+            for (Column column: joinedSchema) {
+                columnSizes.add(column.getColSize());
+            }
+            joinNode.setStatistics(new Statistics(rowCount, columnSizes, mins, maxs, numNulls));
         }
         return result;
     }

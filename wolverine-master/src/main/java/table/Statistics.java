@@ -50,12 +50,13 @@ public class Statistics {
     }
 
     public String toString() {
-        return "______ ______ STATISTICS ______ ______\n"
-            + "Row count: " + Integer.toString(rowCount) + "\n"
-            + "Column sizes: " + columnSizes.toString() + "\n"
-            + "Maximums: " + maxs.toString() + "\n"
-            + "Minimums: " + mins.toString() + "\n"
-            + "Null count: " + numNulls.toString();
+        return "+------- STATISTICS -------+\n"
+            + "| Row count: " + rowCount + "\n"
+            + "| Column sizes: " + columnSizes+ "\n"
+            + "| Maximums: " + maxs + "\n"
+            + "| Minimums: " + mins + "\n"
+            + "| Null count: " + numNulls + "\n"
+            + "+--------------------------+";
     }
 
 }

@@ -100,6 +100,10 @@ public class JoinNode extends Node {
         this._contained = _contained;
     }
 
+    public void setStatistics(Statistics statistics) {
+        this.statistics = statistics;
+    }
+
     public String getTableNameLeft() {
         return tableNameLeft;
     }

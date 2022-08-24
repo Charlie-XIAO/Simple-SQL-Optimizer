@@ -102,7 +102,9 @@ public class Launcher {
             count ++;
         }
         plan.printPlan();
-        System.out.println(((JoinNode) plan.getLogicalPlan().get(2).get(0)).table.getSchema());
+        JoinNode joinNode = (JoinNode) plan.getLogicalPlan().get(2).get(0);
+        System.out.println("Schema: " + joinNode.table.getSchema());
+        System.out.println(joinNode.getStatistics());
     }
 
     public static void main(String[] args) throws Exception {

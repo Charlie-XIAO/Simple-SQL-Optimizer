@@ -130,9 +130,11 @@ public class ScanNode extends Node {
                 records.add(record);
                 rowCount ++;
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
         this.statistics = new Statistics(rowCount, columnSizes, mins, maxs, numNulls);
     }
+    
 }
