@@ -3,10 +3,14 @@ package plan;
 import table.Record;
 import table.Statistics;
 import table.Table;
+import table.Column;
 import plan.type.JoinType;
 import plan.type.PhysicalJoinType;
 import utils.BackTracingIterator;
-import utils.ListBacktracingIterator;
+import utils.DummyNestedLoopJoinIterator;
+import utils.BlockNestedLoopJoinIterator;
+import utils.HashJoinIterator;
+import utils.SortMergeJoinIterator;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,17 +25,18 @@ public class JoinNode extends Node {
     private String tableNameRight;
     private String columnNameLeft;
     private String columnNameRight;
-    private PhysicalJoinType physicalJoinType = PhysicalJoinType.BLOCK_NESTED_LOOP_JOIN;
+    private boolean isLeftOutside = true;
+    private PhysicalJoinType physicalJoinType = PhysicalJoinType.DUMMY_NESTED_LOOP_JOIN;
     // JoinNode has `left` and `right` instead of `child` in its parent class Node
     private Node left;
     private Node right;
     // for data storage
     public Table table = new Table();
     public List<Record> records = new ArrayList<>();
-    // CBO join reorder required information
-    private Set<String> _contained;
     // CBO required statistics
     private Statistics statistics = new Statistics();
+    // CBO join reorder required information
+    private Set<String> _contained;
 
     public void setLeft(Node left) {
         this.left = left;
@@ -115,6 +120,10 @@ public class JoinNode extends Node {
         return joinType;
     }
 
+    public Statistics getStatistics() {
+        return statistics;
+    }
+
     public Set<String> getContained() {
         if (_contained != null) {
             return _contained;
@@ -151,6 +160,16 @@ public class JoinNode extends Node {
         this.physicalJoinType = physicalJoinType;
     }
 
+    public void setTableSchema(List<Column> schema) {
+        for (Column column: schema) {
+            this.table.addField(column.getColName(), column.getColType(), column.getColSize());
+        }
+    }
+
+    public void setRecords(List<Record> records) {
+        this.records = records;
+    }
+
     @Override
     public Iterator<Record> iterator() {
         return backTracingIterator();
@@ -160,262 +179,15 @@ public class JoinNode extends Node {
     public BackTracingIterator<Record> backTracingIterator() {
         switch (physicalJoinType) {
         case DUMMY_NESTED_LOOP_JOIN:
-            return new DummyNestedLoopJoinIterator(true);
+            return new DummyNestedLoopJoinIterator(this, isLeftOutside);
         case BLOCK_NESTED_LOOP_JOIN:
-            return new BlockNestedLoopJoinIterator(true);
+            return new BlockNestedLoopJoinIterator(this, isLeftOutside);
         case HASH_JOIN:
-            return new HashJoinIterator();
+            return new HashJoinIterator(this, isLeftOutside);
         case SORT_MERGE_JOIN:
-            return new SortMergeJoinIterator();
+            return new SortMergeJoinIterator(this, isLeftOutside);
         default:
             return null;
-        }
-    }
-
-    private class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> {
-
-        private BackTracingIterator<Record> outsideSource;
-        private BackTracingIterator<Record> insideSource;
-        private Record outsideRecord;
-        private Record nextRecord;
-
-        public DummyNestedLoopJoinIterator(boolean isLeftOutside) {
-            BackTracingIterator<Record> leftIterator = JoinNode.this.getLeft().backTracingIterator();
-            BackTracingIterator<Record> rightIterator = JoinNode.this.getRight().backTracingIterator();
-            outsideSource = (isLeftOutside) ? leftIterator : rightIterator;
-            insideSource = (isLeftOutside) ? rightIterator : leftIterator;
-            outsideRecord = (outsideSource.hasNext()) ? outsideSource.next() : null;
-            insideSource.markStart();
-            nextRecord = computeNextRecord();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return nextRecord != null;
-        }
-
-        @Override
-        public Record next() {
-            //lazy evaluation
-            if (!hasNext()) {
-                throw new java.util.NoSuchElementException();
-            }
-            Record result = nextRecord;
-            nextRecord = computeNextRecord();
-            return result;
-        }
-
-        private Record computeNextRecord() {
-            if (outsideRecord == null) {
-                return null;
-            }
-            while (true) {
-                if (insideSource.hasNext()) {
-                    Record insideRecord = insideSource.next();
-                    return outsideRecord.concat(insideRecord);
-                } else if (outsideSource.hasNext()) {
-                    outsideRecord = outsideSource.next();
-                    insideSource.reset();
-                } else {
-                    return null;
-                }
-            }
-        }
-
-        @Override
-        public void markPrev() {
-            outsideSource.markPrev();
-            insideSource.markPrev();
-        }
-
-        @Override
-        public void markNext() {
-            outsideSource.markNext();
-            insideSource.markNext();
-        }
-
-        @Override
-        public void reset() {
-            outsideSource.reset();
-            insideSource.reset();
-        }
-
-        @Override
-        public void markStart() {
-            outsideSource.markStart();
-            insideSource.markStart();
-        }
-    }
-
-    private class BlockNestedLoopJoinIterator implements BackTracingIterator<Record> {
-        private BackTracingIterator<Record> outsideSource;
-        private BackTracingIterator<Record> insideSource;
-        private BackTracingIterator<Record> outsideBuffer;
-        private BackTracingIterator<Record> outsideBufferBackup;
-        private Record outsideRecord;
-
-        private Record insideRecord;
-        private Record nextRecord;
-        private int bufferSize = 100;
-
-        public BlockNestedLoopJoinIterator(boolean isLeftOutside) {
-            BackTracingIterator<Record> leftIterator = JoinNode.this.getLeft().backTracingIterator();
-            BackTracingIterator<Record> rightIterator = JoinNode.this.getRight().backTracingIterator();
-            outsideSource = (isLeftOutside) ? leftIterator : rightIterator;
-            insideSource = (isLeftOutside) ? rightIterator : leftIterator;
-
-            List<Record> buffer = new java.util.ArrayList<Record>();
-            for (int i = 0; i < bufferSize; i ++) {
-                if (outsideSource.hasNext()) {
-                    buffer.add(outsideSource.next());
-                } else {
-                    break;
-                }
-            }
-            outsideBuffer = new ListBacktracingIterator(buffer);
-            insideRecord = (insideSource.hasNext()) ? insideSource.next() : null;
-            insideSource.markStart();
-            outsideBuffer.markStart();
-            nextRecord = computeNextRecord();
-        }
-
-        private Record computeNextRecord() {
-            if (insideRecord == null) {
-                return null;
-            }
-            while (true) {
-                if (outsideBuffer.hasNext()) {
-                    return outsideBuffer.next().concat(insideRecord);
-                } else if (insideSource.hasNext()) {
-                    insideRecord = insideSource.next();
-                    outsideBuffer.reset();
-                } else if (outsideSource.hasNext()) {
-                    List<Record> buffer = new java.util.ArrayList<Record>();
-                    for (int i = 0; i < bufferSize; i ++) {
-                        if (outsideSource.hasNext()) {
-                            buffer.add(outsideSource.next());
-                        } else {
-                            break;
-                        }
-                    }
-                    outsideBuffer = new ListBacktracingIterator(buffer);
-                    insideSource.reset();
-                    insideRecord = insideSource.next();
-                } else {
-                    return null;
-                }
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            return nextRecord != null;
-        }
-
-        @Override
-        public Record next() {
-            if (!hasNext()) {
-                throw new java.util.NoSuchElementException();
-            }
-            Record result = nextRecord;
-            nextRecord = computeNextRecord();
-            return result;
-        }
-
-        @Override
-        public void markPrev() {
-            outsideSource.markPrev();
-            insideSource.markPrev();
-            outsideBufferBackup = outsideBuffer;
-            outsideBufferBackup.markPrev();
-        }
-
-        @Override
-        public void markNext() {
-            outsideSource.markNext();
-            insideSource.markNext();
-            outsideBufferBackup = outsideBuffer;
-            outsideBufferBackup.markNext();
-        }
-
-        @Override
-        public void reset() {
-            outsideSource.reset();
-            insideSource.reset();
-            outsideBuffer = outsideBufferBackup;
-            outsideBuffer.reset();
-        }
-
-        @Override
-        public void markStart() {
-            outsideSource.markStart();
-            insideSource.markStart();
-            outsideBuffer = outsideBufferBackup;
-            outsideBuffer.markStart();
-        }
-    }
-
-    private class HashJoinIterator implements BackTracingIterator<Record> {
-        @Override
-        public boolean hasNext() {
-            return false;
-        }
-
-        @Override
-        public Record next() {
-            return null;
-        }
-
-        @Override
-        public void markPrev() {
-
-        }
-
-        @Override
-        public void markNext() {
-
-        }
-
-        @Override
-        public void reset() {
-
-        }
-
-        @Override
-        public void markStart() {
-
-        }
-    }
-
-    private class SortMergeJoinIterator implements BackTracingIterator<Record> {
-        @Override
-        public boolean hasNext() {
-            return false;
-        }
-
-        @Override
-        public Record next() {
-            return null;
-        }
-
-        @Override
-        public void markPrev() {
-
-        }
-
-        @Override
-        public void markNext() {
-
-        }
-
-        @Override
-        public void reset() {
-
-        }
-
-        @Override
-        public void markStart() {
-
         }
     }
 

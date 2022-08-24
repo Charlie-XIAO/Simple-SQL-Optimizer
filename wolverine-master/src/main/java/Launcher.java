@@ -9,6 +9,7 @@ import plan.LogicalPlanner;
 import plan.Node;
 import plan.OutputNode;
 import plan.ScanNode;
+import plan.JoinNode;
 import table.Record;
 
 import java.util.Map;
@@ -29,9 +30,9 @@ public class Launcher {
         SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText.toUpperCase()));
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         SqlBaseParser parser = new SqlBaseParser(tokenStream);
-        OutputNode originalLogicalPlan = (OutputNode) builder.visit(parser.singleStatement());
-        originalLogicalPlan.printPlan();
-        Map<Integer, List<Node>> logicalPlan = originalLogicalPlan.getLogicalPlan();
+        OutputNode plan = (OutputNode) builder.visit(parser.singleStatement());
+        plan.printPlan();
+        Map<Integer, List<Node>> logicalPlan = plan.getLogicalPlan();
         ScanNode scanNode = (ScanNode) logicalPlan.get(8).get(1);
         Iterator<Record> iterator = scanNode.iterator();
         System.out.println(scanNode.records);
@@ -77,17 +78,38 @@ public class Launcher {
         SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText.toUpperCase()));
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         SqlBaseParser parser = new SqlBaseParser(tokenStream);
-        OutputNode originalLogicalPlan = (OutputNode) builder.visit(parser.singleStatement());
-        originalLogicalPlan.printPlan();
-        JoinReorder joinReorderRewriter = new JoinReorder(originalLogicalPlan);
+        OutputNode plan = (OutputNode) builder.visit(parser.singleStatement());
+        plan.printPlan();
+        JoinReorder joinReorderRewriter = new JoinReorder(plan);
         System.out.println(" -------- -------- -------- -------- --------");
         System.out.println("Test message: " + joinReorderRewriter.getJoinPredicates());
     }
 
+    private static void ExecuteTest() throws Exception {
+        String sqlText =
+            "SELECT students.name, courses.cid "
+                + "FROM students FULL JOIN courses ON students.sid = courses.cid ";
+        LogicalPlanner builder = new LogicalPlanner();
+        SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText.toUpperCase()));
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        SqlBaseParser parser = new SqlBaseParser(tokenStream);
+        OutputNode plan = (OutputNode) builder.visit(parser.singleStatement());
+        Iterator<Record> iterator = plan.iterator();
+        int count = 1;
+        while (iterator.hasNext()) {
+            System.out.print("[" + count + "] ");
+            System.out.println(iterator.next());
+            count ++;
+        }
+        plan.printPlan();
+        System.out.println(((JoinNode) plan.getLogicalPlan().get(2).get(0)).table.getSchema());
+    }
+
     public static void main(String[] args) throws Exception {
-        System.out.println("\n-------- Parser Test --------\n"); ParserTest();
+        //System.out.println("\n-------- Parser Test --------\n"); ParserTest();
         //System.out.println("\n-------- RBO Test --------\n"); RBOTest();
         //System.out.println("\n-------- CBO Test --------\n"); CBOTest();
+        System.out.println("\n-------- Execute Test --------\n"); ExecuteTest();
     }
 
 }

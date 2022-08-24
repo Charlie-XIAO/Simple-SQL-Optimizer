@@ -5,13 +5,24 @@ import table.Data.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class Record {
     
     private List<Data> data = new ArrayList<>();
     private List<Column> schema;
+    
+    // for join node check
+    private boolean _used = false;
 
     public Record() {}
+
+    public Record(int columns, List<Column> schema) {
+        this.schema = schema;
+        for (int i = 0; i < columns; i ++) {
+            data.add(new NullData());
+        }
+    }
 
     public Record(CSVRecord csvRecord, List<Column> schema) {
         this.schema = schema;
@@ -71,6 +82,38 @@ public class Record {
         }
     }
 
+    public boolean used() {
+        return _used;
+    }
+
+    public List<Column> getSchema() {
+        return schema;
+    }
+
+    public List<String> getColumnNames() {
+        List<String> columnNames = new ArrayList<>();
+        for (Column column: schema) {
+            columnNames.add(column.getColName());
+        }
+        return columnNames;
+    }
+
+    public List<String> getColumnNamesUpperCase() {
+        List<String> columnNames = new ArrayList<>();
+        for (Column column: schema) {
+            columnNames.add(column.getColName().toUpperCase(Locale.ENGLISH));
+        }
+        return columnNames;
+    }
+
+    public void setSchema(List<Column> schema) {
+        this.schema = schema;
+    }
+
+    public void markUsed() {
+        this._used = true;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < data.size(); i ++) {
@@ -90,6 +133,10 @@ public class Record {
         Record newRecord = new Record();
         newRecord.getData().addAll(this.getData());
         newRecord.getData().addAll(record.getData());
+        List<Column> newSchema = new ArrayList<>(this.schema);
+        newSchema.addAll(record.schema);
+        newRecord.setSchema(newSchema);
         return newRecord;
     }
+
 }

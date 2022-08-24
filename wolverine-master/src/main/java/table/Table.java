@@ -35,8 +35,14 @@ public class Table {
     // add field and meanwhile returning the size of that field
     public int addField(String name, String type) {
         Column column = new Column(name, type);
-        this.schema.add(new Column(name, type));
+        this.schema.add(column);
         return column.getColSize();
     }
-}
 
+    public int addField(String name, ColumnType type, int size) {
+        Column column = new Column(name, type, size);
+        this.schema.add(column);
+        return column.getColSize();
+    }
+
+}
