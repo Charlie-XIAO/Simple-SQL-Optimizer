@@ -139,4 +139,16 @@ public class Record {
         return newRecord;
     }
 
+    public Record concatExcept(Record record, int index) {
+        Record newRecord = new Record();
+        newRecord.getData().addAll(this.getData());
+        newRecord.getData().addAll(record.getData().subList(0, index));
+        newRecord.getData().addAll(record.getData().subList(index + 1, record.getData().size()));
+        List<Column> newSchema = new ArrayList<>(this.schema);
+        newSchema.addAll(record.schema.subList(0, index));
+        newSchema.addAll(record.schema.subList(index + 1, record.schema.size()));
+        newRecord.setSchema(newSchema);
+        return newRecord;
+    }
+
 }

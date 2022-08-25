@@ -31,10 +31,14 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
     private int outsideLength, insideLength;  // outer joins required null record length
     private List<Column> outsideSchema, insideSchema; // outer joins required null record schema
     private boolean terminate = false;  // outer joins required terminate condition
+    private boolean removeDuplicate = false; // joins required remove duplicated column
 
     public DummyNestedLoopJoinIterator(JoinNode joinNode, boolean isLeftOutside) {
         this.joinNode = joinNode;
         this.joinType = joinNode.getJoinType();
+        if (joinNode.getColumnNameLeft().equals(joinNode.getColumnNameRight())) {
+            removeDuplicate = true;
+        }
         BackTracingIterator<Record> leftIterator = joinNode.getLeft().backTracingIterator();
         BackTracingIterator<Record> rightIterator = joinNode.getRight().backTracingIterator();
         if (joinType == JoinType.INNER) {
@@ -47,7 +51,13 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             insideIndex = (isLeftOutside) ? tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameRight()) : tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameLeft());
             insideSource.reset();
             joinedSchema = new ArrayList<>(outsideRecord.getSchema());
-            joinedSchema.addAll(tempInsideRecord.getSchema());
+            if (removeDuplicate) {
+                joinedSchema.addAll(tempInsideRecord.getSchema().subList(0, insideIndex));
+                joinedSchema.addAll(tempInsideRecord.getSchema().subList(insideIndex + 1, tempInsideRecord.getSchema().size()));
+            }
+            else {
+                joinedSchema.addAll(tempInsideRecord.getSchema());
+            }
             nextRecord = computeNextInnerRecord(outsideIndex, insideIndex);
         }
         else if (joinType == JoinType.LEFT) {
@@ -64,7 +74,13 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             insideIndex = (isLeftOutside) ? tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameRight()) : tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameLeft());
             insideSource.reset();
             joinedSchema = new ArrayList<>(outsideSchema);
-            joinedSchema.addAll(insideSchema);
+            if (removeDuplicate) {
+                joinedSchema.addAll(insideSchema.subList(0, insideIndex));
+                joinedSchema.addAll(insideSchema.subList(insideIndex + 1, insideSchema.size()));
+            }
+            else {
+                joinedSchema.addAll(insideSchema);
+            }
             nextRecord = computeNextLeftRecord(outsideIndex, insideIndex);
         }
         else if (joinType == JoinType.RIGHT) {
@@ -81,7 +97,13 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             insideIndex = (isLeftOutside) ? tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameLeft()) : tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameRight());
             insideSource.reset();
             joinedSchema = new ArrayList<>(outsideSchema);
-            joinedSchema.addAll(insideSchema);
+            if (removeDuplicate) {
+                joinedSchema.addAll(insideSchema.subList(0, insideIndex));
+                joinedSchema.addAll(insideSchema.subList(insideIndex + 1, insideSchema.size()));
+            }
+            else {
+                joinedSchema.addAll(insideSchema);
+            }
             nextRecord = computeNextLeftRecord(outsideIndex, insideIndex);
         }
         else if (joinType == JoinType.FULL) {
@@ -98,7 +120,13 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             insideIndex = (isLeftOutside) ? tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameRight()) : tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameLeft());
             insideSource.reset();
             joinedSchema = new ArrayList<>(outsideSchema);
-            joinedSchema.addAll(insideSchema);
+            if (removeDuplicate) {
+                joinedSchema.addAll(insideSchema.subList(0, insideIndex));
+                joinedSchema.addAll(insideSchema.subList(insideIndex + 1, insideSchema.size()));
+            }
+            else {
+                joinedSchema.addAll(insideSchema);
+            }
             nextRecord = computeNextFullRecord(outsideIndex, insideIndex);
         }
         else {
@@ -109,7 +137,13 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             Record tempInsideRecord = insideSource.next();
             insideSource.reset();
             joinedSchema = new ArrayList<>(outsideRecord.getSchema());
-            joinedSchema.addAll(tempInsideRecord.getSchema());
+            if (removeDuplicate) {
+                joinedSchema.addAll(tempInsideRecord.getSchema().subList(0, insideIndex));
+                joinedSchema.addAll(tempInsideRecord.getSchema().subList(insideIndex + 1, tempInsideRecord.getSchema().size()));
+            }
+            else {
+                joinedSchema.addAll(tempInsideRecord.getSchema());
+            }
             nextRecord = computeNextRecord();
         }
         joinNode.setTableSchema(joinedSchema);
@@ -242,7 +276,7 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
         while (true) {
             if (insideSource.hasNext()) {
                 Record insideRecord = insideSource.next();
-                return outsideRecord.concat(insideRecord);
+                return concat(outsideRecord, insideRecord);
             }
             else if (outsideSource.hasNext()) {
                 outsideRecord = outsideSource.next();
@@ -262,7 +296,7 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             if (insideSource.hasNext()) {
                 Record insideRecord = insideSource.next();
                 if (insideRecord.getData().get(insideIndex).getEvalExpression().equals(outsideRecord.getData().get(outsideIndex).getEvalExpression())) {
-                    return outsideRecord.concat(insideRecord);
+                    return concat(outsideRecord, insideRecord);
                 }
             }
             else if (outsideSource.hasNext()) {
@@ -284,11 +318,11 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
                 Record insideRecord = insideSource.next();
                 if (insideRecord.getData().get(insideIndex).getEvalExpression().equals(outsideRecord.getData().get(outsideIndex).getEvalExpression())) {
                     outsideRecord.markUsed();
-                    return outsideRecord.concat(insideRecord);
+                    return concat(outsideRecord, insideRecord);
                 }
             }
             else if (outsideSource.hasNext() && !outsideRecord.used()) {
-                Record result = outsideRecord.concat(new Record(insideLength, insideSchema));
+                Record result = concat(outsideRecord, new Record(insideLength, insideSchema));
                 outsideRecord = outsideSource.next();
                 insideSource.reset();
                 return result;
@@ -299,7 +333,7 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             }
             else if (!outsideRecord.used()) {
                 terminate = true;
-                return outsideRecord.concat(new Record(insideLength, insideSchema));
+                return concat(outsideRecord, new Record(insideLength, insideSchema));
             }
             else {
                 return null;
@@ -316,7 +350,7 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
                 if (insideSource.hasNext()) {
                     Record insideRecord = insideSource.next();
                     if (!insideRecord.used()) {
-                        return new Record(outsideLength, outsideSchema).concat(insideRecord);
+                        return concat(new Record(outsideLength, outsideSchema), insideRecord);
                     }
                 }
                 else {
@@ -330,11 +364,11 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
                 if (insideRecord.getData().get(insideIndex).getEvalExpression().equals(outsideRecord.getData().get(outsideIndex).getEvalExpression())) {
                     outsideRecord.markUsed();
                     insideRecord.markUsed();
-                    return outsideRecord.concat(insideRecord);
+                    return concat(outsideRecord, insideRecord);
                 }
             }
             else if (outsideSource.hasNext() && !outsideRecord.used()) {
-                Record result = outsideRecord.concat(new Record(insideLength, insideSchema));
+                Record result = concat(outsideRecord, new Record(insideLength, insideSchema));
                 outsideRecord = outsideSource.next();
                 insideSource.reset();
                 return result;
@@ -346,11 +380,20 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             else if (!outsideRecord.used()) {
                 terminate = true;
                 insideSource.reset();
-                return outsideRecord.concat(new Record(insideLength, insideSchema));
+                return concat(outsideRecord, new Record(insideLength, insideSchema));
             }
             else {
                 return null;
             }
+        }
+    }
+
+    private Record concat(Record outsideRecord, Record insideRecord) {
+        if (removeDuplicate) {
+            return outsideRecord.concatExcept(insideRecord, insideIndex);
+        }
+        else {
+            return outsideRecord.concat(insideRecord);
         }
     }
 
