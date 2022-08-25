@@ -31,7 +31,7 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
     private int outsideLength, insideLength;  // outer joins required null record length
     private List<Column> outsideSchema, insideSchema; // outer joins required null record schema
     private boolean terminate = false;  // outer joins required terminate condition
-    private boolean removeDuplicate = false; // joins required remove duplicated column
+    private boolean removeDuplicate = false; // joins required slot for removing duplicated columns
 
     public DummyNestedLoopJoinIterator(JoinNode joinNode, boolean isLeftOutside) {
         this.joinNode = joinNode;
@@ -133,8 +133,10 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             outsideSource = (isLeftOutside) ? leftIterator : rightIterator;
             insideSource = (isLeftOutside) ? rightIterator : leftIterator;
             outsideRecord = (outsideSource.hasNext()) ? outsideSource.next() : null;
+            outsideIndex = (isLeftOutside) ? outsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameLeft()) : outsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameRight());
             insideSource.markStart();
             Record tempInsideRecord = insideSource.next();
+            insideIndex = (isLeftOutside) ? tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameRight()) : tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameLeft());
             insideSource.reset();
             joinedSchema = new ArrayList<>(outsideRecord.getSchema());
             if (removeDuplicate) {

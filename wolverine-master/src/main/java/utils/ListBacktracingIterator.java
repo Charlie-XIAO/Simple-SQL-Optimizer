@@ -45,4 +45,5 @@ public class ListBacktracingIterator implements BackTracingIterator<Record> {
     public void markStart() {
         markIndex = 0;
     }
+    
 }

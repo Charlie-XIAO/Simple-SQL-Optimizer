@@ -166,7 +166,11 @@ public class JoinNode extends Node {
 
     public void setTableSchema(List<Column> schema) {
         for (Column column: schema) {
-            this.table.addField(column.getColName(), column.getColType(), column.getColSize());
+            String tableName = column.getTableName();
+            if (!table.getTableNames().contains(tableName)) {
+                table.addTableName(tableName);
+            }
+            table.addField(tableName, column.getColName(), column.getColType(), column.getColSize());
         }
     }
 

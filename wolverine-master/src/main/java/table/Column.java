@@ -4,17 +4,20 @@ import java.util.Locale;
 
 public class Column {
     
+    private String tableName;
     private String colName;
     private ColumnType colType;
     private int colSize;
 
-    public Column(String colName, ColumnType colType, int colSize) {
+    public Column(String tableName, String colName, ColumnType colType, int colSize) {
+        this.tableName = tableName;
         this.colName = colName;
         this.colType = colType;
         this.colSize = colSize;
     }
 
-    public Column(String colName, String colType) {
+    public Column(String tableName, String colName, String colType) {
+        this.tableName = tableName;
         this.colName = colName;
         if (colType == null) {
             this.colType = ColumnType.UNKNOWN;
@@ -41,6 +44,14 @@ public class Column {
 
     public String toString() {
         return String.format("%s %s(%d)", colName, colType, colSize);
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public String getTableName() {
+        return tableName;
     }
 
     public String getColName() {

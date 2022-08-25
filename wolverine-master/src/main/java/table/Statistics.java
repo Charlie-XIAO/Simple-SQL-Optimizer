@@ -50,13 +50,12 @@ public class Statistics {
     }
 
     public String toString() {
-        return "+------- STATISTICS -------+\n"
+        return "STATISTICS\n"
             + "| Row count: " + rowCount + "\n"
             + "| Column sizes: " + columnSizes+ "\n"
             + "| Maximums: " + maxs + "\n"
             + "| Minimums: " + mins + "\n"
-            + "| Null count: " + numNulls + "\n"
-            + "+--------------------------+";
+            + "| Null count: " + numNulls;
     }
 
 }

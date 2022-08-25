@@ -88,8 +88,9 @@ public class Launcher {
     private static void ExecuteTest() throws Exception {
         String sqlText =
             "SELECT students.name, courses.cid "
-                + "FROM students FULL JOIN enrollments ON students.sid = enrollments.sid "
-                + "FULL JOIN courses ON enrollments.cid = courses.cid";
+                + "FROM students FULL JOIN courses on students.sid = enrollments.cid";
+            //    + "FROM students FULL JOIN enrollments ON students.sid = enrollments.sid "
+            //    + "FULL JOIN courses ON enrollments.cid = courses.cid";
         LogicalPlanner builder = new LogicalPlanner();
         SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText.toUpperCase()));
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
@@ -106,6 +107,7 @@ public class Launcher {
         JoinNode joinNode = (JoinNode) plan.getLogicalPlan().get(2).get(0);
         System.out.println("Schema: " + joinNode.table.getSchema());
         System.out.println(joinNode.getStatistics());
+        System.out.println(joinNode.records.size() + " records enumerated.");
     }
 
     public static void main(String[] args) throws Exception {

@@ -5,11 +5,17 @@ import java.util.List;
 
 public class Table {
 
-    private String tableName;
+    private List<String> tableNames = new ArrayList<>();
     private List<Column> schema = new ArrayList<>();
 
-    public String getTableName() {
-        return tableName;
+    public Table() {}
+
+    public Table(List<String> tableNames) {
+        this.tableNames = tableNames;
+    }
+
+    public List<String> getTableNames() {
+        return tableNames;
     }
 
     public List<Column> getSchema() {
@@ -24,8 +30,12 @@ public class Table {
         return columnNames;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void addTableName(String tableName) {
+        this.tableNames.add(tableName);
+    }
+
+    public void setTableNames(List<String> tableNames) {
+        this.tableNames = tableNames;
     }
 
     public void setSchema(List<Column> schema) {
@@ -33,14 +43,14 @@ public class Table {
     }
 
     // add field and meanwhile returning the size of that field
-    public int addField(String name, String type) {
-        Column column = new Column(name, type);
+    public int addField(String tableName, String name, String type) {
+        Column column = new Column(tableName, name, type);
         this.schema.add(column);
         return column.getColSize();
     }
 
-    public int addField(String name, ColumnType type, int size) {
-        Column column = new Column(name, type, size);
+    public int addField(String tableName, String name, ColumnType type, int size) {
+        Column column = new Column(tableName, name, type, size);
         this.schema.add(column);
         return column.getColSize();
     }

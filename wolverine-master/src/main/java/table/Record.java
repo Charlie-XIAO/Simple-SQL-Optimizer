@@ -105,7 +105,7 @@ public class Record {
         }
         return columnNames;
     }
-
+    
     public void setSchema(List<Column> schema) {
         this.schema = schema;
     }

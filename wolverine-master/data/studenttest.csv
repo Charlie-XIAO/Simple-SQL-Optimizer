@@ -1,0 +1,11 @@
+sid int,name string,major string,gpa float
+1,Augustina Mazzoni,Chemistry,1.005420210172708
+2,Rachel Nugent,Art History,3.872256353606213
+3,Wilburn Lamson,Art History,2.886956910371463
+4,Sharilyn Havens,Biology,2.9571260727339514
+5,Jonah Vanhoy,Chemistry,1.757128473162053
+6,Elijah Pinnix,Business,1.0981805569522254
+7,Darron Bladen,Business,1.0759229784499584
+8,Caprice Verdin,Business,1.8687480647602839
+9,Ramiro Mauriello,Biology,3.671119895688771
+10,Adriene Moeller,CS,2.511224621628675

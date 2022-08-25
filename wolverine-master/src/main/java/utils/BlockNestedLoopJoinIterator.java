@@ -13,7 +13,7 @@ public class BlockNestedLoopJoinIterator implements BackTracingIterator<Record> 
     private BackTracingIterator<Record> outsideBufferBackup;
     private Record insideRecord;
     private Record nextRecord;
-    private final int BUFFER_SIZE = 100;
+    private final int BUFFER_SIZE = 200;
 
     public BlockNestedLoopJoinIterator(JoinNode joinNode, boolean isLeftOutside) {
         BackTracingIterator<Record> leftIterator = joinNode.getLeft().backTracingIterator();

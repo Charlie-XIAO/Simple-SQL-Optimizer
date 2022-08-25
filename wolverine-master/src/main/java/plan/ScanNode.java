@@ -7,6 +7,7 @@ import table.Record;
 import table.Data.*;
 import table.Statistics;
 import table.Table;
+import table.Column;
 import utils.BackTracingIterator;
 import utils.ListBacktracingIterator;
 
@@ -60,6 +61,7 @@ public class ScanNode extends Node {
         List<Double> maxs = new ArrayList<>();
         List<Integer> numNulls = new ArrayList<>();
         String fileLoc = String.format("./wolverine-master/data/%s.csv", tableName);
+        table.addTableName(tableName);
         try {
             Reader in = new FileReader(fileLoc);
             CSVFormat csvFormat = CSVFormat.DEFAULT.withHeader();
@@ -68,7 +70,7 @@ public class ScanNode extends Node {
             for (String header: headers) {
                 String colName = header.split(" ")[0];
                 String colType = header.split(" ")[1];
-                columnSizes.add(table.addField(colName, colType));
+                columnSizes.add(table.addField(tableName, colName, colType));
             }
             for (CSVRecord csvRecord: csvRecords) {
                 Record record = new Record(csvRecord, table.getSchema());
