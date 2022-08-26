@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
+//import javax.script.ScriptEngine;
+//import javax.script.ScriptEngineManager;
 
 import utils.BackTracingIterator;
 import utils.ListBacktracingIterator;
@@ -35,6 +35,20 @@ public class FilterNode extends Node {
         return tableNames;
     }
 
+    public FilterNode selectByTableName(String tableName) {
+        FilterNode filterNode = new FilterNode();
+        for (FilterItem filterItem: items) {
+            if (filterItem.tableName.equals(tableName)) {
+                filterNode.addItem(filterItem);
+            }
+        }
+        return filterNode;
+    }
+
+    public int getItemCount() {
+        return items.size();
+    }
+
     public String toString() {
         return "Filter(" + items + ")";
     }
@@ -46,10 +60,11 @@ public class FilterNode extends Node {
 
     @Override
     public BackTracingIterator<Record> backTracingIterator() {
-        filterRecords();
+        //filterRecords();
         return new ListBacktracingIterator(records);
     }
 
+    /*
     private void filterRecords() {
         Node child = this.getChild();
         List<Record> targetRecords = new ArrayList<>();
@@ -83,6 +98,7 @@ public class FilterNode extends Node {
             }
         }
     }
+    */
 
 }
 

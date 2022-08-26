@@ -6,11 +6,12 @@ import plan.Node;
 import plan.ProjectNode;
 import plan.SortNode;
 
-public class RBOptimizer {
+public class LimitPushDown {
+
     private Node root;
     private boolean isLimitPushedDown;
 
-    public RBOptimizer(Node root) {
+    public LimitPushDown(Node root) {
         this.root = root;
         this.isLimitPushedDown = false;
     }
@@ -25,7 +26,8 @@ public class RBOptimizer {
         if (node.isJoinNode()) {
             optimize(((JoinNode) node).getLeft());
             optimize(((JoinNode) node).getRight());
-        } else {
+        }
+        else {
             if (node.getChild() != null) {
                 optimize(node.getChild());
             }
@@ -50,7 +52,8 @@ public class RBOptimizer {
                     node.setChild(sortNode.getChild());
                     sortNode.setChild(projectNode.getChild());
                     projectNode.setChild(limitNode);
-                } else {
+                }
+                else {
                     node.setChild(limitNode.getChild());
                     limitNode.setChild(projectNode.getChild());
                     projectNode.setChild(limitNode);

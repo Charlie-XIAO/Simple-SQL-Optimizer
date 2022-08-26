@@ -1,7 +1,8 @@
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import RBO.RBOptimizer;
+import RBO.LimitPushDown;
+import RBO.FilterPushDown;
 import CBO.JoinReorder;
 import parser.SqlBaseLexer;
 import parser.SqlBaseParser;
@@ -10,6 +11,7 @@ import plan.Node;
 import plan.OutputNode;
 import plan.ScanNode;
 import plan.JoinNode;
+import plan.FilterNode;
 import table.Record;
 
 import java.util.Map;
@@ -42,13 +44,15 @@ public class Launcher {
 
     private static void RBOTest() throws Exception {
         String sqlText =
-            "SELECT students.name, courses.name "
-                + "FROM students INNER JOIN courses ON students.sid = courses.sid "
-                + "WHERE students.sid = 1 "
-                + "GROUP BY students.name "
-                + "HAVING SUM(courses.credit) > 3 "
-                + "ORDER BY students.name "
-                + "LIMIT 1";
+            "SELECT SUM(A.ID), B.NAME "
+                + "FROM A LEFT JOIN B ON A.ID = B.ID "
+                + "FULL JOIN C ON B.ID = C.ID "
+                + "FULL JOIN D ON A.ID = D.ID "
+                + "WHERE A.ID > 10 AND B.ID > 10 AND C.ID > 10 AND C.ID > 10 "
+                + "GROUP BY A.ID, B.ID "
+                + "HAVING SUM(A.ID) > 10 "
+                + "ORDER BY C.SCORE DESC, D.SCORE "
+                + "LIMIT 2";
         LogicalPlanner builder = new LogicalPlanner();
         SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText.toUpperCase()));
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
@@ -56,7 +60,10 @@ public class Launcher {
         OutputNode plan = (OutputNode) builder.visit(parser.singleStatement());
         plan.printPlan();
         System.out.println();
-        Node optimizedPlan = new RBOptimizer(plan).getOptimizedPlan();
+        Node optimizedPlan;
+        optimizedPlan = new LimitPushDown(plan).getOptimizedPlan();
+        optimizedPlan.printPlan();
+        optimizedPlan = new FilterPushDown((FilterNode) plan.getChild().getChild().getChild().getChild().getChild().getChild()).getOptimizedPlan();
         optimizedPlan.printPlan();
     }
 
@@ -91,13 +98,13 @@ public class Launcher {
                 + "FROM enrollments FULL JOIN courses ON enrollments.cid = courses.cid";
         String sqlText2 =
             "SELECT students.sid "
-                + "FROM students FULL JOIN courses on courses.cid = students.sid";
+                + "FROM students FULL JOIN courses on students.sid = courses.cid";
         String sqlText3 =
             "SELECT students.sid, courses.cid "
                 + "FROM students FULL JOIN enrollments on students.sid = enrollments.sid "
                 + "FULL JOIN courses on enrollments.cid = courses.cid ";
         LogicalPlanner builder = new LogicalPlanner();
-        SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText2.toUpperCase()));
+        SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText3.toUpperCase()));
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         SqlBaseParser parser = new SqlBaseParser(tokenStream);
         OutputNode plan = (OutputNode) builder.visit(parser.singleStatement());
@@ -117,9 +124,9 @@ public class Launcher {
 
     public static void main(String[] args) throws Exception {
         //System.out.println("\n-------- Parser Test --------\n"); ParserTest();
-        //System.out.println("\n-------- RBO Test --------\n"); RBOTest();
+        System.out.println("\n-------- RBO Test --------\n"); RBOTest();
         //System.out.println("\n-------- CBO Test --------\n"); CBOTest();
-        System.out.println("\n-------- Execute Test --------\n"); ExecuteTest();
+        //System.out.println("\n-------- Execute Test --------\n"); ExecuteTest();
     }
 
 }
