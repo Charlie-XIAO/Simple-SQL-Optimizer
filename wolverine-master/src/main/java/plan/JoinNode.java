@@ -160,6 +160,35 @@ public class JoinNode extends Node {
             + columnNameRight + ")";
     }
 
+    @Deprecated
+    public void validate() {
+        List<String> leftTableNames;
+        if (left instanceof ScanNode) {
+            leftTableNames = ((ScanNode) left).table.getTableNames();
+        }
+        else if (left instanceof FilterNode) {
+            leftTableNames = ((FilterNode) left).table.getTableNames();
+        }
+        else if (left instanceof JoinNode) {
+            leftTableNames = ((JoinNode) left).table.getTableNames();
+        }
+        else {
+            throw new Error("JoinNode might have invalid child nodes.");
+        }
+        if (!leftTableNames.contains(tableNameLeft)) {
+            String temp;
+            temp = tableNameLeft;
+            tableNameLeft = tableNameRight;
+            tableNameRight = temp;
+            temp = columnNameLeft;
+            columnNameLeft = columnNameRight;
+            columnNameRight = temp;
+            if (!leftTableNames.contains(tableNameLeft)) {
+                throw new Error("Join predicate might be incorrect.");
+            }
+        }
+    }
+
     public void setPhysicalJoinType(PhysicalJoinType physicalJoinType) {
         this.physicalJoinType = physicalJoinType;
     }

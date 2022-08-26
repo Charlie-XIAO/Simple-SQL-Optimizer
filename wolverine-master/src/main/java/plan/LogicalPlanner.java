@@ -318,24 +318,24 @@ public class LogicalPlanner extends SqlBaseBaseVisitor {
         }
     }
 
-    private void parseRelation(RelationContext ctx, Node father) {
+    private void parseRelation(RelationContext ctx, Node parent) {
         int childCount = ctx.getChildCount();
         if (childCount == 1) {
             ScanNode scanNode = new ScanNode();
-            scanNode.setHeight(father.getHeight() + 1);
+            scanNode.setHeight(parent.getHeight() + 1);
             scanNode.setTableName(ctx.getChild(0).getText());
-            if (father.isJoinNode()) {
-                if (((JoinNode) father).getLeft() == null) {
-                    ((JoinNode) father).setLeft(scanNode);
+            if (parent.isJoinNode()) {
+                if (((JoinNode) parent).getLeft() == null) {
+                    ((JoinNode) parent).setLeft(scanNode);
                 } else {
-                    ((JoinNode) father).setRight(scanNode);
+                    ((JoinNode) parent).setRight(scanNode);
                 }
             } else {
-                father.setChild(scanNode);
+                parent.setChild(scanNode);
             }
         } else if (childCount == 5) {
             JoinNode joinNode = new JoinNode();
-            joinNode.setHeight(father.getHeight() + 1);
+            joinNode.setHeight(parent.getHeight() + 1);
             joinNode.setJoinType(JoinType.valueOf(ctx.getChild(1).getText()));
             PrimaryExpressionContext primaryExpressionContext =
                 (PrimaryExpressionContext) ctx.getChild(4).getChild(1).getChild(0).getChild(0);
@@ -353,14 +353,14 @@ public class LogicalPlanner extends SqlBaseBaseVisitor {
             joinNode.setColumnNameRight(aggTableColumn2.b.b);
             parseRelation((RelationContext) ctx.getChild(0), joinNode);
             parseRelation((RelationContext) ctx.getChild(3), joinNode);
-            if (father.isJoinNode()) {
-                if (((JoinNode) father).getLeft() == null) {
-                    ((JoinNode) father).setLeft(joinNode);
+            if (parent.isJoinNode()) {
+                if (((JoinNode) parent).getLeft() == null) {
+                    ((JoinNode) parent).setLeft(joinNode);
                 } else {
-                    ((JoinNode) father).setRight(joinNode);
+                    ((JoinNode) parent).setRight(joinNode);
                 }
             } else {
-                father.setChild(joinNode);
+                parent.setChild(joinNode);
             }
         } else {
             throw new RuntimeException("Relation must have at least one table");

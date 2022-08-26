@@ -86,13 +86,18 @@ public class Launcher {
     }
 
     private static void ExecuteTest() throws Exception {
-        String sqlText =
-            "SELECT students.name, courses.cid "
-                + "FROM students FULL JOIN courses on students.sid = enrollments.cid";
-            //    + "FROM students FULL JOIN enrollments ON students.sid = enrollments.sid "
-            //    + "FULL JOIN courses ON enrollments.cid = courses.cid";
+        String sqlText1 =
+            "SELECT courses.cid "
+                + "FROM enrollments FULL JOIN courses ON enrollments.cid = courses.cid";
+        String sqlText2 =
+            "SELECT students.sid "
+                + "FROM students FULL JOIN courses on courses.cid = students.sid";
+        String sqlText3 =
+            "SELECT students.sid, courses.cid "
+                + "FROM students FULL JOIN enrollments on students.sid = enrollments.sid "
+                + "FULL JOIN courses on enrollments.cid = courses.cid ";
         LogicalPlanner builder = new LogicalPlanner();
-        SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText.toUpperCase()));
+        SqlBaseLexer lexer = new SqlBaseLexer(CharStreams.fromString(sqlText2.toUpperCase()));
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         SqlBaseParser parser = new SqlBaseParser(tokenStream);
         OutputNode plan = (OutputNode) builder.visit(parser.singleStatement());

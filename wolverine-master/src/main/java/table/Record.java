@@ -11,9 +11,7 @@ public class Record {
     
     private List<Data> data = new ArrayList<>();
     private List<Column> schema;
-    
-    // for join node check
-    private boolean _used = false;
+    private boolean _used = false;  // for join node check
 
     public Record() {}
 
@@ -136,6 +134,8 @@ public class Record {
         List<Column> newSchema = new ArrayList<>(this.schema);
         newSchema.addAll(record.schema);
         newRecord.setSchema(newSchema);
+        this.markUsed();
+        record.markUsed();
         return newRecord;
     }
 
@@ -148,6 +148,8 @@ public class Record {
         newSchema.addAll(record.schema.subList(0, index));
         newSchema.addAll(record.schema.subList(index + 1, record.schema.size()));
         newRecord.setSchema(newSchema);
+        this.markUsed();
+        record.markUsed();
         return newRecord;
     }
 

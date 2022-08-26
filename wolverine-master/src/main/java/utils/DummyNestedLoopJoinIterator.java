@@ -31,14 +31,26 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
     private int outsideLength, insideLength;  // outer joins required null record length
     private List<Column> outsideSchema, insideSchema; // outer joins required null record schema
     private boolean terminate = false;  // outer joins required terminate condition
-    private boolean removeDuplicate = false; // joins required slot for removing duplicated columns
+    /**
+     * duplicate removed too early may cause unexpected null data
+     * should remove duplicated when output
+     * 
+     * private boolean removeDuplicate = false; // joins required slot for removing duplicated columns
+     * 
+     */
 
     public DummyNestedLoopJoinIterator(JoinNode joinNode, boolean isLeftOutside) {
         this.joinNode = joinNode;
         this.joinType = joinNode.getJoinType();
-        if (joinNode.getColumnNameLeft().equals(joinNode.getColumnNameRight())) {
-            removeDuplicate = true;
-        }
+        /**
+         * duplicate removed too early may cause unexpected null data
+         * should remove duplicated when output
+         * 
+         * if (joinNode.getColumnNameLeft().equals(joinNode.getColumnNameRight())) {
+         *     removeDuplicate = true;
+         * }
+         * 
+         */
         BackTracingIterator<Record> leftIterator = joinNode.getLeft().backTracingIterator();
         BackTracingIterator<Record> rightIterator = joinNode.getRight().backTracingIterator();
         if (joinType == JoinType.INNER) {
@@ -51,13 +63,21 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             insideIndex = (isLeftOutside) ? tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameRight()) : tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameLeft());
             insideSource.reset();
             joinedSchema = new ArrayList<>(outsideRecord.getSchema());
-            if (removeDuplicate) {
-                joinedSchema.addAll(tempInsideRecord.getSchema().subList(0, insideIndex));
-                joinedSchema.addAll(tempInsideRecord.getSchema().subList(insideIndex + 1, tempInsideRecord.getSchema().size()));
-            }
-            else {
-                joinedSchema.addAll(tempInsideRecord.getSchema());
-            }
+            /**
+             * duplicate removed too early may cause unexpected null data
+             * should remove duplicated when output
+             * 
+             * if (removeDuplicate) {
+             *     joinedSchema.addAll(tempInsideRecord.getSchema().subList(0, insideIndex));
+             *     joinedSchema.addAll(tempInsideRecord.getSchema().subList(insideIndex + 1, tempInsideRecord.getSchema().size()));
+             * }
+             * else {
+             *     joinedSchema.addAll(tempInsideRecord.getSchema());
+             * }
+             * 
+             * the following code is the substitute
+             */
+            joinedSchema.addAll(tempInsideRecord.getSchema());
             nextRecord = computeNextInnerRecord(outsideIndex, insideIndex);
         }
         else if (joinType == JoinType.LEFT) {
@@ -74,13 +94,21 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             insideIndex = (isLeftOutside) ? tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameRight()) : tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameLeft());
             insideSource.reset();
             joinedSchema = new ArrayList<>(outsideSchema);
-            if (removeDuplicate) {
-                joinedSchema.addAll(insideSchema.subList(0, insideIndex));
-                joinedSchema.addAll(insideSchema.subList(insideIndex + 1, insideSchema.size()));
-            }
-            else {
-                joinedSchema.addAll(insideSchema);
-            }
+            /**
+             * duplicate removed too early may cause unexpected null data
+             * should remove duplicated when output
+             * 
+             * if (removeDuplicate) {
+             *     joinedSchema.addAll(insideSchema.subList(0, insideIndex));
+             *     joinedSchema.addAll(insideSchema.subList(insideIndex + 1, insideSchema.size()));
+             * }
+             * else {
+             *     joinedSchema.addAll(insideSchema);
+             * }
+             * 
+             * the following code is the substitute
+             */
+            joinedSchema.addAll(insideSchema);
             nextRecord = computeNextLeftRecord(outsideIndex, insideIndex);
         }
         else if (joinType == JoinType.RIGHT) {
@@ -97,13 +125,21 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             insideIndex = (isLeftOutside) ? tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameLeft()) : tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameRight());
             insideSource.reset();
             joinedSchema = new ArrayList<>(outsideSchema);
-            if (removeDuplicate) {
-                joinedSchema.addAll(insideSchema.subList(0, insideIndex));
-                joinedSchema.addAll(insideSchema.subList(insideIndex + 1, insideSchema.size()));
-            }
-            else {
-                joinedSchema.addAll(insideSchema);
-            }
+            /**
+             * duplicate removed too early may cause unexpected null data
+             * should remove duplicated when output
+             * 
+             * if (removeDuplicate) {
+             *     joinedSchema.addAll(insideSchema.subList(0, insideIndex));
+             *     joinedSchema.addAll(insideSchema.subList(insideIndex + 1, insideSchema.size()));
+             * }
+             * else {
+             *     joinedSchema.addAll(insideSchema);
+             * }
+             * 
+             * the following code is the substitute
+             */
+            joinedSchema.addAll(insideSchema);
             nextRecord = computeNextLeftRecord(outsideIndex, insideIndex);
         }
         else if (joinType == JoinType.FULL) {
@@ -120,13 +156,21 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             insideIndex = (isLeftOutside) ? tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameRight()) : tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameLeft());
             insideSource.reset();
             joinedSchema = new ArrayList<>(outsideSchema);
-            if (removeDuplicate) {
-                joinedSchema.addAll(insideSchema.subList(0, insideIndex));
-                joinedSchema.addAll(insideSchema.subList(insideIndex + 1, insideSchema.size()));
-            }
-            else {
-                joinedSchema.addAll(insideSchema);
-            }
+            /**
+             * duplicate removed too early may cause unexpected null data
+             * should remove duplicated when output
+             * 
+             * if (removeDuplicate) {
+             *     joinedSchema.addAll(insideSchema.subList(0, insideIndex));
+             *     joinedSchema.addAll(insideSchema.subList(insideIndex + 1, insideSchema.size()));
+             * }
+             * else {
+             *     joinedSchema.addAll(insideSchema);
+             * }
+             * 
+             * the following code is the substitute
+             */
+            joinedSchema.addAll(insideSchema);
             nextRecord = computeNextFullRecord(outsideIndex, insideIndex);
         }
         else {
@@ -139,13 +183,21 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             insideIndex = (isLeftOutside) ? tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameRight()) : tempInsideRecord.getColumnNamesUpperCase().indexOf(joinNode.getColumnNameLeft());
             insideSource.reset();
             joinedSchema = new ArrayList<>(outsideRecord.getSchema());
-            if (removeDuplicate) {
-                joinedSchema.addAll(tempInsideRecord.getSchema().subList(0, insideIndex));
-                joinedSchema.addAll(tempInsideRecord.getSchema().subList(insideIndex + 1, tempInsideRecord.getSchema().size()));
-            }
-            else {
-                joinedSchema.addAll(tempInsideRecord.getSchema());
-            }
+            /**
+             * duplicate removed too early may cause unexpected null data
+             * should remove duplicated when output
+             * 
+             * if (removeDuplicate) {
+             *     joinedSchema.addAll(tempInsideRecord.getSchema().subList(0, insideIndex));
+             *     joinedSchema.addAll(tempInsideRecord.getSchema().subList(insideIndex + 1, tempInsideRecord.getSchema().size()));
+             * }
+             * else {
+             *     joinedSchema.addAll(tempInsideRecord.getSchema());
+             * }
+             * 
+             * the following code is the substitute
+             */
+            joinedSchema.addAll(tempInsideRecord.getSchema());
             nextRecord = computeNextRecord();
         }
         joinNode.setTableSchema(joinedSchema);
@@ -319,7 +371,6 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             if (insideSource.hasNext()) {
                 Record insideRecord = insideSource.next();
                 if (insideRecord.getData().get(insideIndex).getEvalExpression().equals(outsideRecord.getData().get(outsideIndex).getEvalExpression())) {
-                    outsideRecord.markUsed();
                     return concat(outsideRecord, insideRecord);
                 }
             }
@@ -364,8 +415,6 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
             if (insideSource.hasNext()) {
                 Record insideRecord = insideSource.next();
                 if (insideRecord.getData().get(insideIndex).getEvalExpression().equals(outsideRecord.getData().get(outsideIndex).getEvalExpression())) {
-                    outsideRecord.markUsed();
-                    insideRecord.markUsed();
                     return concat(outsideRecord, insideRecord);
                 }
             }
@@ -385,18 +434,38 @@ public class DummyNestedLoopJoinIterator implements BackTracingIterator<Record> 
                 return concat(outsideRecord, new Record(insideLength, insideSchema));
             }
             else {
-                return null;
+                terminate = true;
+                insideSource.reset();
+                while (true) {
+                    if (insideSource.hasNext()) {
+                        Record insideRecord = insideSource.next();
+                        if (!insideRecord.used()) {
+                            return concat(new Record(outsideLength, outsideSchema), insideRecord);
+                        }
+                    }
+                    else {
+                        return null;
+                    }
+                }
             }
         }
     }
 
     private Record concat(Record outsideRecord, Record insideRecord) {
-        if (removeDuplicate) {
-            return outsideRecord.concatExcept(insideRecord, insideIndex);
-        }
-        else {
-            return outsideRecord.concat(insideRecord);
-        }
+        /**
+         * duplicate removed too early may cause unexpected null data
+         * should remove duplicated when output
+         * 
+         * if (removeDuplicate) {
+         *     return outsideRecord.concatExcept(insideRecord, insideIndex);
+         * }
+         * else {
+         *     return outsideRecord.concat(insideRecord);
+         * }
+         * 
+         * the following code is the substitute
+         */
+        return outsideRecord.concat(insideRecord);
     }
 
     @Override

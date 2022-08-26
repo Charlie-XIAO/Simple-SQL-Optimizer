@@ -14,5 +14,5 @@ cid int,name VARCHAR(1024),department VARCHAR(1024)
 13,CS 162,Computer Science
 14,BIO 100,Biology
 15,CS 61C,Computer Science
-1000,noname,nodepartment
-1001,noname,nodepartment
+1000,noname1000,nodepartment1000
+1001,noname1001,nodepartment1001

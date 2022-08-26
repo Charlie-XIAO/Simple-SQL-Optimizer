@@ -7,7 +7,6 @@ import table.Record;
 import table.Data.*;
 import table.Statistics;
 import table.Table;
-import table.Column;
 import utils.BackTracingIterator;
 import utils.ListBacktracingIterator;
 
