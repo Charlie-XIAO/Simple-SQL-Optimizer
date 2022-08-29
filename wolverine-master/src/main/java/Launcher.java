@@ -1,8 +1,7 @@
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import RBO.LimitPushDown;
-import RBO.FilterPushDown;
+import RBO.RuleBasedOptimizer;
 import CBO.JoinReorder;
 import parser.SqlBaseLexer;
 import parser.SqlBaseParser;
@@ -60,10 +59,7 @@ public class Launcher {
         OutputNode plan = (OutputNode) builder.visit(parser.singleStatement());
         plan.printPlan();
         System.out.println();
-        Node optimizedPlan;
-        optimizedPlan = new LimitPushDown(plan).getOptimizedPlan();
-        optimizedPlan.printPlan();
-        optimizedPlan = new FilterPushDown((FilterNode) plan.getChild().getChild().getChild().getChild().getChild().getChild()).getOptimizedPlan();
+        Node optimizedPlan = new RuleBasedOptimizer(plan).getOptimizedPlan();
         optimizedPlan.printPlan();
     }
 

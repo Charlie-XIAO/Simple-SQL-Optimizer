@@ -13,12 +13,15 @@ public class FilterPushDown {
         this.filterNode = filterNode;
     }
 
-    public FilterNode getOptimizedPlan() {
+    @Deprecated
+    public Node getOptimizedPlan() {
         optimize();
-        return filterNode;
+        Node filterParent = filterNode.getParent();
+        filterParent.setChild(filterNode.getChild());
+        return filterParent;
     }
 
-    private void optimize() {
+    protected void optimize() {
         Node curNode = (Node) this.filterNode;
         ScanNode scanNode;
         FilterNode subFilterNode;

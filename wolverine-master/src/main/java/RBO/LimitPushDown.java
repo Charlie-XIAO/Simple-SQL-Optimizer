@@ -16,12 +16,17 @@ public class LimitPushDown {
         this.isLimitPushedDown = false;
     }
 
+    @Deprecated
     public Node getOptimizedPlan() {
-        optimize(root);
+        optimize();
         return this.root;
     }
 
-    public void optimize(Node node) {
+    protected void optimize() {
+        optimize(root);
+    }
+
+    private void optimize(Node node) {
         pushDownLimit(node);
         if (node.isJoinNode()) {
             optimize(((JoinNode) node).getLeft());
