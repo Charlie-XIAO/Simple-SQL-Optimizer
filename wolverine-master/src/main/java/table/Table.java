@@ -42,7 +42,6 @@ public class Table {
         this.schema = schema;
     }
 
-    // add field and meanwhile returning the size of that field
     public int addField(String tableName, String name, String type) {
         Column column = new Column(tableName, name, type);
         this.schema.add(column);
@@ -53,6 +52,30 @@ public class Table {
         Column column = new Column(tableName, name, type, size);
         this.schema.add(column);
         return column.getColSize();
+    }
+
+    public int addTargetField(List<String> columns, String tableName, String name, String type) {
+        Column column = new Column(tableName, name, type);
+        System.out.println("Columns " + columns + " check if contains column " + column.getColName()); //////
+        if (columns.contains(column.getColName())) {
+            this.schema.add(column);
+            return column.getColSize();
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int addTargetField(List<String> columns, String tableName, String name, ColumnType type, int size) {
+        Column column = new Column(tableName, name, type, size);
+        System.out.println("Columns " + columns + " check if contains column " + column.getColName()); //////
+        if (columns.contains(column.getColName())) {
+            this.schema.add(column);
+            return column.getColSize();
+        }
+        else {
+            return -1;
+        }
     }
 
 }

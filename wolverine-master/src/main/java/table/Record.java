@@ -80,6 +80,67 @@ public class Record {
         }
     }
 
+    public Record(List<String> columns, CSVRecord csvRecord, List<Column> schema) {
+        this.schema = schema;
+        for (int i = 0; i < schema.size(); i ++) {
+            if (!columns.contains(schema.get(i).getColName())) {
+                continue;
+            }
+            ColumnType colType = schema.get(i).getColType();
+            String originData = csvRecord.get(i);
+            if (originData == "") {
+                data.add(new NullData());
+                continue;
+            }
+            switch (colType) {
+                case BINARY:
+                    data.add(new BinaryData(originData));
+                    break;
+                case BLOB:
+                    data.add(new BlobData(originData));
+                    break;
+                case BOOLEAN:
+                    data.add(new BooleanData(originData));
+                    break;
+                case CHAR:
+                    data.add(new CharData(originData));
+                    break;
+                case DATE:
+                    data.add(new DateData(originData));
+                    break;
+                case DOUBLE:
+                    data.add(new DoubleData(originData));
+                    break;
+                case FLOAT:
+                    data.add(new FloatData(originData));
+                    break;
+                case INT:
+                    data.add(new IntData(originData));
+                    break;
+                case LONG:
+                    data.add(new LongData(originData));
+                    break;
+                case STRING:
+                    data.add(new StringData(originData));
+                    break;
+                case TEXT:
+                    data.add(new TextData(originData));
+                    break;
+                case TIME:
+                    data.add(new TimeData(originData));
+                    break;
+                case TIMESTAMP:
+                    data.add(new TimestampData(originData));
+                    break;
+                case VARCHAR:
+                    data.add(new VarcharData(originData));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     public boolean used() {
         return _used;
     }

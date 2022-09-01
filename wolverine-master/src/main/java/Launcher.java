@@ -10,7 +10,6 @@ import plan.Node;
 import plan.OutputNode;
 import plan.ScanNode;
 import plan.JoinNode;
-import plan.FilterNode;
 import table.Record;
 
 import java.util.Map;
@@ -47,7 +46,7 @@ public class Launcher {
                 + "FROM A LEFT JOIN B ON A.ID = B.ID "
                 + "FULL JOIN C ON B.ID = C.ID "
                 + "FULL JOIN D ON A.ID = D.ID "
-                + "WHERE A.ID > 10 AND B.ID > 10 AND C.ID > 10 AND C.ID > 10 "
+                + "WHERE A.ID > 10 AND B.ID > 10 AND C.ID > 10 "
                 + "GROUP BY A.ID, B.ID "
                 + "HAVING SUM(A.ID) > 10 "
                 + "ORDER BY C.SCORE DESC, D.SCORE "

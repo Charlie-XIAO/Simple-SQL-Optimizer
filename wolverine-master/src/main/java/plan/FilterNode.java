@@ -8,6 +8,7 @@ import java.util.Set;
 //import javax.script.ScriptEngine;
 //import javax.script.ScriptEngineManager;
 
+import utils.TableColumnTuple;
 import utils.BackTracingIterator;
 import utils.ListBacktracingIterator;
 import table.Record;
@@ -20,11 +21,17 @@ public class FilterNode extends Node {
     // for data storage
     public Table table = new Table();
     public List<Record> records = new ArrayList<>();
+    // RBO column pruning required slot
+    Set<TableColumnTuple<String, String>> _required = new HashSet<>();
     // CBO required statistics
     Statistics statistics = new Statistics();
 
     public void addItem(FilterItem item) {
         items.add(item);
+        TableColumnTuple<String, String> newRequired = new TableColumnTuple<String, String>(item.tableName, item.columnName);
+        if (!_required.contains(newRequired)) {
+            _required.add(newRequired);
+        }
     }
 
     public Set<String> getTableNames() {
@@ -47,6 +54,10 @@ public class FilterNode extends Node {
 
     public int getItemCount() {
         return items.size();
+    }
+
+    public Set<TableColumnTuple<String, String>> getRequired() {
+        return _required;
     }
 
     public String toString() {

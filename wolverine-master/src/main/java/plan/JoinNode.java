@@ -6,6 +6,7 @@ import table.Table;
 import table.Column;
 import plan.type.JoinType;
 import plan.type.PhysicalJoinType;
+import utils.TableColumnTuple;
 import utils.BackTracingIterator;
 import utils.DummyNestedLoopJoinIterator;
 import utils.BlockNestedLoopJoinIterator;
@@ -33,6 +34,8 @@ public class JoinNode extends Node {
     // for data storage
     public Table table = new Table();
     public List<Record> records = new ArrayList<>();
+    // RBO column pruning required slot
+    private Set<TableColumnTuple<String, String>> _required = new HashSet<>();
     // CBO required statistics
     private Statistics statistics = new Statistics();
     // CBO join reorder required information
@@ -80,20 +83,46 @@ public class JoinNode extends Node {
         this.joinType = joinType;
     }
 
+    @Deprecated
     public void setTableNameLeft(String tableNameLeft) {
         this.tableNameLeft = tableNameLeft;
+        //_required_tables.add(tableNameLeft);
     }
 
+    @Deprecated
     public void setTableNameRight(String tableNameRight) {
         this.tableNameRight = tableNameRight;
+        //_required_tables.add(tableNameRight);
     }
 
+    @Deprecated
     public void setColumnNameLeft(String columnNameLeft) {
         this.columnNameLeft = columnNameLeft;
+        //_required_columns.add(columnNameLeft);
     }
 
+    @Deprecated
     public void setColumnNameRight(String columnNameRight) {
         this.columnNameRight = columnNameRight;
+        //_required_columns.add(columnNameRight);
+    }
+
+    public void setTableColumnLeft(String tableNameLeft, String columnNameLeft) {
+        this.tableNameLeft = tableNameLeft;
+        this.columnNameLeft = columnNameLeft;
+        TableColumnTuple<String, String> newRequired = new TableColumnTuple<String, String>(tableNameLeft, columnNameLeft);
+        if (!_required.contains(newRequired)) {
+            _required.add(newRequired);
+        }
+    }
+
+    public void setTableColumnRight(String tableNameRight, String columnNameRight) {
+        this.tableNameRight = tableNameRight;
+        this.columnNameRight = columnNameRight;
+        TableColumnTuple<String, String> newRequired = new TableColumnTuple<String, String>(tableNameRight, columnNameRight);
+        if (!_required.contains(newRequired)) {
+            _required.add(newRequired);
+        }
     }
 
     public void setContained(Set<String> _contained) {
@@ -122,6 +151,10 @@ public class JoinNode extends Node {
 
     public JoinType getJoinType() {
         return joinType;
+    }
+
+    public Set<TableColumnTuple<String, String>> getRequired() {
+        return _required;
     }
 
     public Statistics getStatistics() {

@@ -12,6 +12,7 @@ public class RuleBasedOptimizer {
     }
 
     public Node getOptimizedPlan() {
+        new ColumnPruning(root).optimize();  // prune columns
         new LimitPushDown(root).optimize();  // push down limits
         FilterNode filterNode = getFilterNode();
         new FilterPushDown(filterNode).optimize();  // push down filters

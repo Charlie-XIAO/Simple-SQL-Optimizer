@@ -340,8 +340,7 @@ public class LogicalPlanner extends SqlBaseBaseVisitor {
             PrimaryExpressionContext primaryExpressionContext =
                 (PrimaryExpressionContext) ctx.getChild(4).getChild(1).getChild(0).getChild(0);
             Pair<AggregateFuncType, Pair<String, String>> aggTableColumn = parseTableColumn(primaryExpressionContext);
-            joinNode.setTableNameLeft(aggTableColumn.b.a);
-            joinNode.setColumnNameLeft(aggTableColumn.b.b);
+            joinNode.setTableColumnLeft(aggTableColumn.b.a, aggTableColumn.b.b);
             PrimaryExpressionContext primaryExpressionContext2 =
                 (PrimaryExpressionContext) ctx.getChild(4)
                     .getChild(1)
@@ -349,8 +348,7 @@ public class LogicalPlanner extends SqlBaseBaseVisitor {
                     .getChild(1)
                     .getChild(0);
             Pair<AggregateFuncType, Pair<String, String>> aggTableColumn2 = parseTableColumn(primaryExpressionContext2);
-            joinNode.setTableNameRight(aggTableColumn2.b.a);
-            joinNode.setColumnNameRight(aggTableColumn2.b.b);
+            joinNode.setTableColumnRight(aggTableColumn2.b.a, aggTableColumn2.b.b);
             parseRelation((RelationContext) ctx.getChild(0), joinNode);
             parseRelation((RelationContext) ctx.getChild(3), joinNode);
             if (parent.isJoinNode()) {

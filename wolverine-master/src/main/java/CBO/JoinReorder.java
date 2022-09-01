@@ -142,10 +142,8 @@ public class JoinReorder {
                             // create the join tree for left subplan and right subplan as the current plan
                             JoinNode curPlan = new JoinNode();
                             curPlan.setJoinType(joinType);
-                            curPlan.setTableNameLeft(predicateArray[0]);
-                            curPlan.setColumnNameLeft(predicateArray[1]);
-                            curPlan.setTableNameRight(predicateArray[2]);
-                            curPlan.setColumnNameRight(predicateArray[3]);
+                            curPlan.setTableColumnLeft(predicateArray[0], predicateArray[1]);
+                            curPlan.setTableColumnRight(predicateArray[2], predicateArray[3]);
                             curPlan.setLeft(leftSubplan);
                             curPlan.setRight(rightSubplan);
                             planMap.put(planCombination, curPlan);
