@@ -119,8 +119,8 @@ public class Launcher {
 
     public static void main(String[] args) throws Exception {
         //System.out.println("\n-------- Parser Test --------\n"); ParserTest();
-        System.out.println("\n-------- RBO Test --------\n"); RBOTest();
-        //System.out.println("\n-------- CBO Test --------\n"); CBOTest();
+        //System.out.println("\n-------- RBO Test --------\n"); RBOTest();
+        System.out.println("\n-------- CBO Test --------\n"); CBOTest();
         //System.out.println("\n-------- Execute Test --------\n"); ExecuteTest();
     }
 

@@ -59,7 +59,8 @@ public class JoinReorder {
         this.joinPredicates = new JoinPredicates(allJoinNodes);
         if (partitionedJoinNodes.size() == 0) {
             this.hasJoin = false;
-        } else {
+        }
+        else {
             this.hasJoin = true;
         }
     }
