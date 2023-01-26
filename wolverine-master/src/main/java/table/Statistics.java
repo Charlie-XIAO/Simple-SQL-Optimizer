@@ -50,7 +50,7 @@ public class Statistics {
     }
 
     public String toString() {
-        return "STATISTICS\n"
+        return "Statistics:\n"
             + "| Row count: " + rowCount + "\n"
             + "| Column sizes: " + columnSizes+ "\n"
             + "| Maximums: " + maxs + "\n"

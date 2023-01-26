@@ -32,6 +32,7 @@ public class Launcher {
         SqlBaseParser parser = new SqlBaseParser(tokenStream);
         OutputNode plan = (OutputNode) builder.visit(parser.singleStatement());
         plan.printPlan();
+        // Temp test
         Map<Integer, List<Node>> logicalPlan = plan.getLogicalPlan();
         ScanNode scanNode = (ScanNode) logicalPlan.get(8).get(1);
         Iterator<Record> iterator = scanNode.iterator();
@@ -120,8 +121,8 @@ public class Launcher {
     public static void main(String[] args) throws Exception {
         //System.out.println("\n-------- Parser Test --------\n"); ParserTest();
         //System.out.println("\n-------- RBO Test --------\n"); RBOTest();
-        System.out.println("\n-------- CBO Test --------\n"); CBOTest();
-        //System.out.println("\n-------- Execute Test --------\n"); ExecuteTest();
+        //System.out.println("\n-------- CBO Test --------\n"); CBOTest();
+        System.out.println("\n-------- Execute Test --------\n"); ExecuteTest();
     }
 
 }

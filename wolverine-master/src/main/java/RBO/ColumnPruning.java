@@ -25,9 +25,9 @@ public class ColumnPruning {
         Set<TableColumnTuple<String, String>> allRequired = new HashSet<>();
         Node curNode = root;
         while (!curNode.isLeaf()) {
-            System.out.println(curNode);
-            System.out.println("Tup: " + allRequired);
-            System.out.println();
+            //System.out.println(curNode);
+            //System.out.println("Tup: " + allRequired);
+            //System.out.println();
             if (curNode instanceof FilterNode) {
                 FilterNode tempNode = (FilterNode) curNode;
                 for (TableColumnTuple<String, String> required: tempNode.getRequired()) {
